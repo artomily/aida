@@ -21,7 +21,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Divergence — IDX sector residual monitor",
+  title: "Divergence — pemantau residual sektor IDX",
   description:
     "Residual sektor IDX terhadap ekspektasi model dari sinyal pasar regional. Riset internal, bukan nasihat investasi.",
 };

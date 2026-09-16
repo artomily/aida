@@ -6,6 +6,13 @@ export const WATCH_THRESHOLD = 1.0;
 
 export type Status = "DIVERGENT" | "WATCH" | "NORMAL";
 
+/** Status keys stay English in code; only what the reader sees is translated. */
+export const STATUS_LABEL: Record<Status, string> = {
+  DIVERGENT: "MENYIMPANG",
+  WATCH: "PANTAU",
+  NORMAL: "NORMAL",
+};
+
 export type Sector = {
   slug: string;
   code: string;
@@ -19,17 +26,17 @@ export type Sector = {
 };
 
 export const SECTORS: Sector[] = [
-  { slug: "financials", code: "IDXFIN", name: "Financials", e: 0.42, a: 0.55, z: 0.6 },
-  { slug: "energy", code: "IDXENER", name: "Energy", e: -0.31, a: 1.24, z: 2.7 },
-  { slug: "basic-materials", code: "IDXBASIC", name: "Basic Materials", e: 0.68, a: 0.21, z: -1.1 },
-  { slug: "industrials", code: "IDXINDUS", name: "Industrials", e: 0.15, a: 0.09, z: -0.2 },
-  { slug: "consumer-cyclicals", code: "IDXCYC", name: "Consumer Cyclicals", e: 0.24, a: 0.4, z: 0.5 },
-  { slug: "consumer-non-cyclicals", code: "IDXNONCYC", name: "Consumer Non-Cyclicals", e: -0.08, a: -0.12, z: -0.1 },
-  { slug: "healthcare", code: "IDXHEALTH", name: "Healthcare", e: 0.33, a: -0.58, z: -2.2 },
-  { slug: "technology", code: "IDXTECH", name: "Technology", e: 0.91, a: 1.35, z: 0.9 },
-  { slug: "infrastructure", code: "IDXINFRA", name: "Infrastructure", e: 0.11, a: 0.46, z: 1.3 },
-  { slug: "properties", code: "IDXPROP", name: "Properties & Real Estate", e: -0.19, a: -0.27, z: -0.3 },
-  { slug: "transportation", code: "IDXTRANS", name: "Transportation", e: 0.05, a: 0.52, z: 1.0 },
+  { slug: "financials", code: "IDXFIN", name: "Keuangan", e: 0.42, a: 0.55, z: 0.6 },
+  { slug: "energy", code: "IDXENER", name: "Energi", e: -0.31, a: 1.24, z: 2.7 },
+  { slug: "basic-materials", code: "IDXBASIC", name: "Barang Baku", e: 0.68, a: 0.21, z: -1.1 },
+  { slug: "industrials", code: "IDXINDUS", name: "Perindustrian", e: 0.15, a: 0.09, z: -0.2 },
+  { slug: "consumer-cyclicals", code: "IDXCYC", name: "Barang Konsumen Non-Primer", e: 0.24, a: 0.4, z: 0.5 },
+  { slug: "consumer-non-cyclicals", code: "IDXNONCYC", name: "Barang Konsumen Primer", e: -0.08, a: -0.12, z: -0.1 },
+  { slug: "healthcare", code: "IDXHEALTH", name: "Kesehatan", e: 0.33, a: -0.58, z: -2.2 },
+  { slug: "technology", code: "IDXTECH", name: "Teknologi", e: 0.91, a: 1.35, z: 0.9 },
+  { slug: "infrastructure", code: "IDXINFRA", name: "Infrastruktur", e: 0.11, a: 0.46, z: 1.3 },
+  { slug: "properties", code: "IDXPROP", name: "Properti & Real Estat", e: -0.19, a: -0.27, z: -0.3 },
+  { slug: "transportation", code: "IDXTRANS", name: "Transportasi & Logistik", e: 0.05, a: 0.52, z: 1.0 },
 ];
 
 export const MEMBERS: Record<string, [string, string][]> = {

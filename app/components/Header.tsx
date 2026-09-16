@@ -3,9 +3,9 @@
 import type { View } from "../lib/model";
 
 const NAV: [View, string][] = [
-  ["board", "BOARD"],
-  ["detail", "SECTOR"],
-  ["methodology", "METHODOLOGY"],
+  ["board", "PAPAN"],
+  ["detail", "SEKTOR"],
+  ["methodology", "METODOLOGI"],
 ];
 
 export default function Header({
@@ -92,7 +92,7 @@ export default function Header({
             display: "inline-block",
           }}
         />
-        Updated 10:04 WIB
+        Diperbarui 10:04 WIB
       </div>
     </header>
   );

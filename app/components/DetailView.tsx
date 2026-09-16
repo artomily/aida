@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import CompanyReportPanel from "./CompanyReportPanel";
+import { getCompanyReport } from "../lib/companies";
 import {
   NEG,
   POS,
@@ -13,6 +16,7 @@ import {
   fmtPP,
   fmtZ,
   statusOf,
+  STATUS_LABEL,
 } from "../lib/model";
 
 const CELL_BORDER = "1px solid #1a1815";
@@ -39,6 +43,12 @@ export default function DetailView({
   const contributors = contributorsOf(sector);
   const maxContrib = Math.max(...contributors.map((c) => Math.abs(c.contribV)), 1);
 
+  // Largest contributor opens by default — it is the one carrying the residual.
+  const [picked, setPicked] = useState<string | null>(null);
+  const active = contributors.find((c) => c.ticker === picked) ?? contributors[0] ?? null;
+  const activeTicker = active?.ticker ?? null;
+  const report = active ? getCompanyReport(sector.slug, active.ticker, active.retV) : null;
+
   const pts = correlationSeries(sector.slug);
   const linePath = pts
     .map((p, i) => (i ? "L" : "M") + chartX(i).toFixed(1) + " " + chartY(p).toFixed(1))
@@ -47,20 +57,20 @@ export default function DetailView({
   const last = pts[pts.length - 1];
 
   const figures = [
-    { label: "EXPECTED", value: fmt(sector.e), note: "MODEL FIT 10:00", color: "#8a847c", bold: 400 },
-    { label: "ACTUAL", value: fmt(sector.a), note: "INDEX 10:04 WIB", color: "#ded9d1", bold: 400 },
-    { label: "RESIDUAL", value: fmt(r), note: "ACTUAL − EXPECTED", color: col, bold: 600 },
+    { label: "EKSPEKTASI", value: fmt(sector.e), note: "FIT MODEL 10:00", color: "#8a847c", bold: 400 },
+    { label: "REALISASI", value: fmt(sector.a), note: "INDEKS 10:04 WIB", color: "#ded9d1", bold: 400 },
+    { label: "RESIDUAL", value: fmt(r), note: "REALISASI − EKSPEKTASI", color: col, bold: 600 },
   ];
 
   const stats = [
-    { label: "CURRENT ρ", value: last.toFixed(2) },
-    { label: "60D MEAN", value: (pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(2) },
+    { label: "ρ TERKINI", value: last.toFixed(2) },
+    { label: "RERATA 60 HARI", value: (pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(2) },
     {
-      label: "60D RANGE",
+      label: "RENTANG 60 HARI",
       value: Math.min(...pts).toFixed(2) + " – " + Math.max(...pts).toFixed(2),
     },
     {
-      label: "RESIDUAL σ (120D)",
+      label: "σ RESIDUAL (120 HARI)",
       value: (Math.abs(r / (sector.z || 1)) || 0.5).toFixed(2) + "%",
     },
   ];
@@ -94,7 +104,7 @@ export default function DetailView({
           }}
           style={{ color: "#8a847c" }}
         >
-          BOARD
+          PAPAN
         </a>
         <span>/</span>
         <span style={{ color: "#ded9d1" }}>{sector.name.toUpperCase()}</span>
@@ -130,7 +140,7 @@ export default function DetailView({
               marginBottom: 18,
             }}
           >
-            IDX SECTOR INDEX · {sector.code}
+            INDEKS SEKTOR IDX · {sector.code}
           </div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 14 }}>
             <div
@@ -146,7 +156,7 @@ export default function DetailView({
               {fmtZ(sector.z)}
             </div>
             <div style={{ display: "grid", gap: 4, paddingBottom: 8 }}>
-              <span style={badgeStyle(status, pos)}>{status}</span>
+              <span style={badgeStyle(status, pos)}>{STATUS_LABEL[status]}</span>
               <div
                 style={{
                   fontFamily: "var(--font-mono)",
@@ -155,7 +165,7 @@ export default function DetailView({
                   whiteSpace: "nowrap",
                 }}
               >
-                Z-SCORE · 120D RESIDUAL σ
+                Z-SCORE · σ RESIDUAL 120 HARI
               </div>
             </div>
           </div>
@@ -218,10 +228,10 @@ export default function DetailView({
                 color: "#e8e5e0",
               }}
             >
-              CONTRIBUTORS
+              KONTRIBUTOR
             </h2>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#7d776f" }}>
-              TOP 8 BY INDEX WEIGHT · CONTRIBUTION IN pp OF RESIDUAL
+              8 TERATAS MENURUT BOBOT INDEKS · KONTRIBUSI DALAM pp RESIDUAL · KLIK EMITEN UNTUK LAPORAN
             </div>
           </div>
           <div style={{ overflowX: "auto" }}>
@@ -236,17 +246,17 @@ export default function DetailView({
               <thead>
                 <tr style={{ borderTop: "1px solid #24211d", borderBottom: "1px solid #24211d" }}>
                   <th style={{ ...HEAD_CELL, padding: "9px 12px 9px 0", textAlign: "left", width: 78 }}>
-                    TICKER
+                    KODE
                   </th>
-                  <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "left" }}>NAME</th>
+                  <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "left" }}>NAMA</th>
                   <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "right", width: 92 }}>
                     RETURN
                   </th>
                   <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "right", width: 84 }}>
-                    WEIGHT
+                    BOBOT
                   </th>
                   <th style={{ ...HEAD_CELL, padding: "9px 0 9px 12px", textAlign: "left", width: 210 }}>
-                    CONTRIB.
+                    KONTRIBUSI
                   </th>
                 </tr>
               </thead>
@@ -254,8 +264,18 @@ export default function DetailView({
                 {contributors.map((c) => {
                   const cp = c.contribV >= 0;
                   const half = (Math.abs(c.contribV) / maxContrib) * 50;
+                  const isActive = c.ticker === activeTicker;
                   return (
-                    <tr key={c.ticker} className="dv-row">
+                    <tr
+                      key={c.ticker}
+                      className="dv-row"
+                      onClick={() => setPicked(c.ticker)}
+                      style={{
+                        cursor: "pointer",
+                        background: isActive ? "#161412" : "transparent",
+                        borderLeft: `2px solid ${isActive ? POS : "transparent"}`,
+                      }}
+                    >
                       <td
                         style={{
                           padding: "0 12px 0 0",
@@ -355,7 +375,7 @@ export default function DetailView({
               color: "#e8e5e0",
             }}
           >
-            ROLLING CORRELATION
+            KORELASI BERGULIR
           </h2>
           <div
             style={{
@@ -365,7 +385,7 @@ export default function DetailView({
               marginBottom: 16,
             }}
           >
-            60-DAY vs REGIONAL COMPOSITE
+            60 HARI vs KOMPOSIT REGIONAL
           </div>
           <svg
             viewBox="0 0 300 140"
@@ -442,6 +462,8 @@ export default function DetailView({
           </p>
         </div>
       </section>
+
+      {report && <CompanyReportPanel report={report} />}
     </div>
   );
 }

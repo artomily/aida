@@ -10,6 +10,7 @@ import {
   fmtZ,
   statusMix,
   statusOf,
+  STATUS_LABEL,
   type Status,
 } from "../lib/model";
 
@@ -178,7 +179,7 @@ function ResidualColumns() {
                     lines: [
                       `RESIDUAL ${fmt(d.r)}`,
                       `Z-SCORE  ${fmtZ(d.z)}`,
-                      `STATUS   ${d.status}`,
+                      `STATUS   ${STATUS_LABEL[d.status]}`,
                     ],
                   });
                 }}
@@ -230,7 +231,7 @@ function DispersionLine() {
             x: rect.left - b.left + (i / (pts.length - 1)) * rect.width,
             y: rect.top - b.top + 6,
             title: i === pts.length - 1 ? "HARI INI" : `T−${pts.length - 1 - i}`,
-            lines: [`MEAN |z|  ${pts[i].toFixed(2)}`],
+            lines: [`RERATA |z|  ${pts[i].toFixed(2)}`],
           });
         }}
         onMouseLeave={() => {
@@ -283,7 +284,7 @@ function DispersionLine() {
         }}
       >
         <span>T−29</span>
-        <span>MEAN 30D {mean.toFixed(2)}</span>
+        <span>RERATA 30 HARI {mean.toFixed(2)}</span>
         <span style={{ color: POS }}>HARI INI {today.toFixed(2)}</span>
       </div>
       <Tooltip tip={tip} />
@@ -329,7 +330,7 @@ function StatusMix() {
                 setTip({
                   x: t.left - b.left + t.width / 2,
                   y: t.top - b.top,
-                  title: o.key,
+                  title: STATUS_LABEL[o.key],
                   lines: [`${n} dari ${total} sektor`, `${((n / total) * 100).toFixed(0)}% · ${o.note}`],
                 });
               }}
@@ -362,7 +363,7 @@ function StatusMix() {
                 display: "inline-block",
               }}
             />
-            <span style={{ color: "#ded9d1", letterSpacing: "0.1em" }}>{o.key}</span>
+            <span style={{ color: "#ded9d1", letterSpacing: "0.1em" }}>{STATUS_LABEL[o.key]}</span>
             <span style={{ color: DIM, fontSize: 10 }}>{o.note}</span>
             <span style={{ flex: 1 }} />
             <span style={{ color: "#ded9d1" }}>{counts[o.key]}</span>
@@ -387,9 +388,9 @@ export default function BoardCharts() {
       }}
     >
       <div style={{ padding: "22px 28px 22px 0", borderRight: RULE }}>
-        <h2 style={panelTitle}>RESIDUAL BY SECTOR</h2>
+        <h2 style={panelTitle}>RESIDUAL PER SEKTOR</h2>
         <div style={panelNote}>
-          ACTUAL − EXPECTED, pp · <span style={{ color: POS }}>■</span> DI ATAS EKSPEKTASI ·{" "}
+          REALISASI − EKSPEKTASI, pp · <span style={{ color: POS }}>■</span> DI ATAS EKSPEKTASI ·{" "}
           <span style={{ color: NEG }}>■</span> DI BAWAH · <span style={{ color: DIM }}>■</span>{" "}
           DALAM AMBANG NORMAL
         </div>
@@ -397,13 +398,13 @@ export default function BoardCharts() {
       </div>
 
       <div style={{ padding: "22px 28px", borderRight: RULE }}>
-        <h2 style={panelTitle}>DISPERSION · 30 SESI</h2>
+        <h2 style={panelTitle}>DISPERSI · 30 SESI</h2>
         <div style={panelNote}>RATA-RATA |z| SELURUH SEKTOR PER SESI</div>
         <DispersionLine />
       </div>
 
       <div style={{ padding: "22px 0 22px 28px" }}>
-        <h2 style={panelTitle}>STATUS MIX</h2>
+        <h2 style={panelTitle}>KOMPOSISI STATUS</h2>
         <div style={panelNote}>11 SEKTOR IDX PAGI INI</div>
         <StatusMix />
       </div>

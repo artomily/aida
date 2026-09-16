@@ -34,7 +34,8 @@ export default function Page() {
     >
       <Header view={view} onNavigate={go} />
       {view === "board" && <BoardView onOpenSector={openSector} />}
-      {view === "detail" && <DetailView slug={slug} onBack={() => go("board")} />}
+      {/* Keyed by slug so the picked emiten resets when the trader switches sector. */}
+      {view === "detail" && <DetailView key={slug} slug={slug} onBack={() => go("board")} />}
       {view === "methodology" && <MethodologyView />}
     </div>
   );

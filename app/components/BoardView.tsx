@@ -11,15 +11,16 @@ import {
   fmt,
   fmtZ,
   statusOf,
+  STATUS_LABEL,
   type Status,
 } from "../lib/model";
 
 type SortKey = "name" | "e" | "a" | "r" | "z" | "s";
 
 const COLUMNS: { key: SortKey; label: string; align: "left" | "right"; w: string }[] = [
-  { key: "name", label: "SECTOR", align: "left", w: "auto" },
-  { key: "e", label: "EXPECTED", align: "right", w: "110px" },
-  { key: "a", label: "ACTUAL", align: "right", w: "110px" },
+  { key: "name", label: "SEKTOR", align: "left", w: "auto" },
+  { key: "e", label: "EKSPEKTASI", align: "right", w: "110px" },
+  { key: "a", label: "REALISASI", align: "right", w: "110px" },
   { key: "r", label: "RESIDUAL", align: "right", w: "120px" },
   { key: "z", label: "Z-SCORE", align: "right", w: "210px" },
   { key: "s", label: "STATUS", align: "left", w: "130px" },
@@ -60,10 +61,10 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
   const names = divergent.map((d) => d.name).join(" dan ");
 
   const metrics = [
-    { label: "AVG ROLLING CORRELATION", value: "0.48", note: "60D · vs −0.03 WoW" },
-    { label: "MODEL R²", value: "0.31", note: "OOS 0.27" },
+    { label: "RATA-RATA KORELASI BERGULIR", value: "0,48", note: "60 HARI · vs −0,03 WoW" },
+    { label: "R² MODEL", value: "0,31", note: "LUAR SAMPEL 0,27" },
     {
-      label: "DIVERGENT SECTORS",
+      label: "SEKTOR MENYIMPANG",
       value: String(divergent.length),
       note: "|z| ≥ " + DIVERGENT_THRESHOLD.toFixed(1),
     },
@@ -103,7 +104,7 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
               marginBottom: 12,
             }}
           >
-            MORNING BRIEF · PRA-PEMBUKAAN
+            RINGKASAN PAGI · PRA-PEMBUKAAN
           </div>
           <p
             style={{
@@ -119,11 +120,11 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
           >
             Sinyal regional pagi ini konstruktif tapi tipis — Nikkei +0,6%, KOSPI +0,4%, dan futures
             Hang Seng bergerak datar setelah data kredit Tiongkok. Model memperkirakan pembukaan IDX
-            yang rata-rata melebar ke arah positif, dengan beban terbesar pada Technology dan Basic
-            Materials. Realisasi pukul 10:04 memperlihatkan {divergent.length || "nol"} sektor
-            menyimpang di luar ambang: {names || "tidak ada"}. Energy menyerap dorongan harga batu
+            yang rata-rata melebar ke arah positif, dengan beban terbesar pada Teknologi dan Barang
+            Baku. Realisasi pukul 10:04 memperlihatkan {divergent.length || "nol"} sektor
+            menyimpang di luar ambang: {names || "tidak ada"}. Energi menyerap dorongan harga batu
             bara termal yang tidak tercermin di variabel kontrol regional, sementara pelemahan
-            Healthcare terkonsentrasi pada dua emiten berkapitalisasi besar — residual yang lebih
+            Kesehatan terkonsentrasi pada dua emiten berkapitalisasi besar — residual yang lebih
             layak dibaca sebagai peristiwa emiten, bukan rotasi sektor.
           </p>
         </div>
@@ -182,10 +183,10 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
               color: "#e8e5e0",
             }}
           >
-            DIVERGENCE BOARD
+            PAPAN DIVERGENSI
           </h2>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#7d776f" }}>
-            11 SEKTOR IDX · KLIK HEADER UNTUK SORT
+            11 SEKTOR IDX · KLIK JUDUL KOLOM UNTUK MENGURUTKAN
           </div>
           <div style={{ flex: 1 }} />
           <div
@@ -198,10 +199,10 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
             }}
           >
             <span>
-              <span style={{ color: POS }}>■</span> POSITIVE RESIDUAL
+              <span style={{ color: POS }}>■</span> RESIDUAL POSITIF
             </span>
             <span>
-              <span style={{ color: NEG }}>■</span> NEGATIVE RESIDUAL
+              <span style={{ color: NEG }}>■</span> RESIDUAL NEGATIF
             </span>
           </div>
         </div>
@@ -367,7 +368,7 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
                       </div>
                     </td>
                     <td style={{ padding: "0 12px 0 20px", borderBottom: CELL_BORDER }}>
-                      <span style={badgeStyle(d.status, pos)}>{d.status}</span>
+                      <span style={badgeStyle(d.status, pos)}>{STATUS_LABEL[d.status]}</span>
                     </td>
                   </tr>
                 );
@@ -391,8 +392,8 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
           color: "#6f6960",
         }}
       >
-        <span>SOURCE · IDX SECTORS API, REGIONAL INDEX FEEDS (T-1 CLOSE)</span>
-        <span>MODEL · OLS, 120-DAY ROLLING WINDOW</span>
+        <span>SUMBER · API SEKTOR IDX, FEED INDEKS REGIONAL (PENUTUPAN T−1)</span>
+        <span>MODEL · OLS, JENDELA BERGULIR 120 HARI</span>
         <div style={{ flex: 1 }} />
         <span>BUKAN NASIHAT INVESTASI. UNTUK RISET INTERNAL.</span>
       </footer>

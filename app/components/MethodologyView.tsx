@@ -20,29 +20,29 @@ const SECTION_TITLE = {
 } as const;
 
 const SPEC = [
-  { label: "ESTIMATOR", value: "OLS, HAC (Newey–West, 5 lag)" },
-  { label: "ESTIMATION WINDOW", value: "120 hari bursa, bergulir" },
+  { label: "ESTIMATOR", value: "OLS, HAC (Newey–West, 5 jeda)" },
+  { label: "JENDELA ESTIMASI", value: "120 hari bursa, bergulir" },
   { label: "TARGET", value: "Return sektor 09:00–10:00 WIB" },
-  { label: "REFIT", value: "Harian, 06:30 WIB" },
-  { label: "UNIVERSE", value: "11 indeks sektor IDX-IC" },
+  { label: "PEMBARUAN MODEL", value: "Harian, 06:30 WIB" },
+  { label: "CAKUPAN", value: "11 indeks sektor IDX-IC" },
 ];
 
 const CONTROLS = [
-  { name: "R_reg", source: "Composite Nikkei / KOSPI / TAIEX", lag: "same-day", t: "6.41" },
-  { name: "HSI futures", source: "Overnight session", lag: "t−1", t: "3.18" },
-  { name: "S&P 500", source: "US close", lag: "t−1", t: "4.77" },
-  { name: "USD/IDR", source: "Spot 08:45 WIB", lag: "same-day", t: "2.94" },
-  { name: "Brent", source: "ICE front month", lag: "same-day", t: "2.05" },
-  { name: "Newcastle coal", source: "GlobalCOAL", lag: "t−1", t: "1.72" },
-  { name: "IDX foreign flow", source: "KSEI net, 5d MA", lag: "t−1", t: "2.36" },
+  { name: "R_reg", source: "Komposit Nikkei / KOSPI / TAIEX", lag: "hari sama", t: "6.41" },
+  { name: "Futures HSI", source: "Sesi semalam", lag: "t−1", t: "3.18" },
+  { name: "S&P 500", source: "Penutupan AS", lag: "t−1", t: "4.77" },
+  { name: "USD/IDR", source: "Spot 08:45 WIB", lag: "hari sama", t: "2.94" },
+  { name: "Brent", source: "ICE bulan terdekat", lag: "hari sama", t: "2.05" },
+  { name: "Batu bara Newcastle", source: "GlobalCOAL", lag: "t−1", t: "1.72" },
+  { name: "Arus asing IDX", source: "KSEI neto, MA 5 hari", lag: "t−1", t: "2.36" },
 ];
 
 const OOS = [
-  { label: "R² IN-SAMPLE", value: "0.31" },
-  { label: "R² OUT-OF-SAMPLE", value: "0.27" },
-  { label: "RMSE RESIDUAL", value: "0.52%" },
-  { label: "FALSE-POSITIVE RATE (|z| ≥ 2)", value: "18,4%" },
-  { label: "ALERT FREQUENCY", value: "1,6 sektor/hari" },
+  { label: "R² DALAM SAMPEL", value: "0,31" },
+  { label: "R² LUAR SAMPEL", value: "0,27" },
+  { label: "RMSE RESIDUAL", value: "0,52%" },
+  { label: "TINGKAT POSITIF PALSU (|z| ≥ 2)", value: "18,4%" },
+  { label: "FREKUENSI PERINGATAN", value: "1,6 sektor/hari" },
 ];
 
 const BUCKETS = [
@@ -57,27 +57,27 @@ const LIMITS = [
   {
     num: "01",
     title: "KORELASI YANG RUNTUH",
-    body: "Ketika korelasi bergulir turun di bawah 0,30 — biasanya saat guncangan domestik — model kehilangan daya prediksi dan hampir semua sektor tampak divergent. Pada kondisi itu z-score melebar karena ekspektasinya lemah, bukan karena pasarnya menyimpang.",
+    body: "Ketika korelasi bergulir turun di bawah 0,30 — biasanya saat guncangan domestik — model kehilangan daya prediksi dan hampir semua sektor tampak menyimpang. Pada kondisi itu z-score melebar karena ekspektasinya lemah, bukan karena pasarnya menyimpang.",
   },
   {
     num: "02",
     title: "KONSENTRASI EMITEN",
-    body: "Beberapa indeks sektor IDX didominasi dua atau tiga emiten. Residual Healthcare atau Technology sering merupakan peristiwa satu emiten yang diperbesar oleh bobot kapitalisasi, bukan rotasi sektor. Halaman kontributor ada untuk memisahkan keduanya — selalu periksa sebelum menafsirkan.",
+    body: "Beberapa indeks sektor IDX didominasi dua atau tiga emiten. Residual Kesehatan atau Teknologi sering merupakan peristiwa satu emiten yang diperbesar oleh bobot kapitalisasi, bukan rotasi sektor. Halaman kontributor ada untuk memisahkan keduanya — selalu periksa sebelum menafsirkan.",
   },
   {
     num: "03",
     title: "JENDELA SATU JAM",
-    body: "Target hanya mencakup jam pertama perdagangan. Residual pagi tidak bertahan sampai penutupan pada mayoritas kasus; hit rate di atas menunjukkan berapa sering arahnya tetap, dan angkanya jauh dari pasti.",
+    body: "Target hanya mencakup jam pertama perdagangan. Residual pagi tidak bertahan sampai penutupan pada mayoritas kasus; tingkat ketepatan di atas menunjukkan berapa sering arahnya tetap, dan angkanya jauh dari pasti.",
   },
   {
     num: "04",
     title: "AKSI KORPORASI",
-    body: "Ex-dividend, stock split, dan suspensi dibersihkan dari seri return, tetapi rebalancing indeks dan perubahan free float diterapkan dengan jeda — satu hingga dua hari setelah efektif residual bisa keliru.",
+    body: "Ex-dividend, pemecahan saham, dan suspensi dibersihkan dari seri return, tetapi penyeimbangan ulang indeks dan perubahan free float diterapkan dengan jeda — satu hingga dua hari setelah efektif residual bisa keliru.",
   },
   {
     num: "05",
     title: "BUKAN MODEL HARGA",
-    body: "Tidak ada komponen expected return, tidak ada horizon, tidak ada ukuran posisi. Residual adalah alat penyaring perhatian: ia menunjukkan ke mana harus menoleh pagi ini, dan tidak menyatakan apa pun soal ke mana harga akan bergerak.",
+    body: "Tidak ada komponen ekspektasi return, tidak ada horizon, tidak ada ukuran posisi. Residual adalah alat penyaring perhatian: ia menunjukkan ke mana harus menoleh pagi ini, dan tidak menyatakan apa pun soal ke mana harga akan bergerak.",
   },
 ];
 
@@ -103,7 +103,7 @@ export default function MethodologyView() {
               marginBottom: 12,
             }}
           >
-            METHODOLOGY · v2.4
+            METODOLOGI · v2.4
           </div>
           <h1
             style={{
@@ -147,7 +147,7 @@ export default function MethodologyView() {
         }}
       >
         <div style={{ padding: "26px 28px 30px 0", borderRight: RULE }}>
-          <h2 style={SECTION_TITLE}>SPECIFICATION</h2>
+          <h2 style={SECTION_TITLE}>SPESIFIKASI</h2>
           <div
             style={{
               border: RULE,
@@ -193,7 +193,7 @@ export default function MethodologyView() {
           </div>
         </div>
         <div style={{ padding: "26px 0 30px 28px" }}>
-          <h2 style={SECTION_TITLE}>CONTROL VARIABLES</h2>
+          <h2 style={SECTION_TITLE}>VARIABEL KONTROL</h2>
           <div style={{ overflowX: "auto" }}>
             <table
               style={{
@@ -206,14 +206,14 @@ export default function MethodologyView() {
               <thead>
                 <tr style={{ borderTop: RULE, borderBottom: RULE }}>
                   <th style={{ ...HEAD_CELL, padding: "9px 12px 9px 0", textAlign: "left" }}>
-                    VARIABLE
+                    VARIABEL
                   </th>
-                  <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "left" }}>SOURCE</th>
+                  <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "left" }}>SUMBER</th>
                   <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "right", width: 96 }}>
-                    LAG
+                    JEDA
                   </th>
                   <th style={{ ...HEAD_CELL, padding: "9px 0 9px 12px", textAlign: "right", width: 120 }}>
-                    MEAN |t|
+                    RERATA |t|
                   </th>
                 </tr>
               </thead>
@@ -277,7 +277,7 @@ export default function MethodologyView() {
         }}
       >
         <div style={{ padding: "26px 28px 30px 0", borderRight: RULE }}>
-          <h2 style={SECTION_TITLE}>OUT-OF-SAMPLE</h2>
+          <h2 style={SECTION_TITLE}>LUAR SAMPEL</h2>
           <p
             style={{
               margin: "0 0 18px 0",
@@ -313,7 +313,7 @@ export default function MethodologyView() {
           </div>
         </div>
         <div style={{ padding: "26px 0 30px 28px" }}>
-          <h2 style={{ ...SECTION_TITLE, margin: "0 0 4px 0" }}>HIT RATE PER |Z| BUCKET</h2>
+          <h2 style={{ ...SECTION_TITLE, margin: "0 0 4px 0" }}>TINGKAT KETEPATAN PER KELOMPOK |z|</h2>
           <div
             style={{
               fontFamily: "var(--font-mono)",
@@ -367,7 +367,7 @@ export default function MethodologyView() {
 
       <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 2.1fr)" }}>
         <div style={{ padding: "26px 28px 30px 0", borderRight: RULE }}>
-          <h2 style={{ ...SECTION_TITLE, margin: 0, color: POS }}>LIMITATIONS</h2>
+          <h2 style={{ ...SECTION_TITLE, margin: 0, color: POS }}>KETERBATASAN</h2>
         </div>
         <div style={{ padding: "26px 0 30px 28px", display: "grid", gap: 22 }}>
           {LIMITS.map((l) => (
@@ -434,7 +434,7 @@ export default function MethodologyView() {
           color: "#6f6960",
         }}
       >
-        <span>MODEL CARD · REVISI 04 SEP 2026</span>
+        <span>KARTU MODEL · REVISI 04 SEP 2026</span>
         <div style={{ flex: 1 }} />
         <span>BUKAN NASIHAT INVESTASI. UNTUK RISET INTERNAL.</span>
       </footer>
