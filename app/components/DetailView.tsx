@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import CompanyReportPanel from "./CompanyReportPanel";
+import SectorNews from "./markets/SectorNews";
+import type { SectorSlug } from "../lib/markets/types";
 import { getCompanyReport } from "../lib/companies";
 import {
   DIVERGENT_THRESHOLD,
@@ -268,6 +270,13 @@ export default function DetailView({
           </p>
         </Glass>
       </div>
+
+      <Glass delay={460} style={{ marginBottom: 20 }}>
+        <SectorNews
+          sector={sector.slug as SectorSlug}
+          symbols={contributors.map((c) => `${c.ticker}.JK`)}
+        />
+      </Glass>
 
       {report && <CompanyReportPanel report={report} />}
 

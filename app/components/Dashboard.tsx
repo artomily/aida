@@ -5,11 +5,12 @@ import BoardView from "./BoardView";
 import DetailView from "./DetailView";
 import Header from "./Header";
 import MethodologyView from "./MethodologyView";
-import { BookIcon, GridIcon, HomeIcon } from "./ui";
+import CompareView from "./markets/CompareView";
+import { BookIcon, GridIcon, HomeIcon, SwapIcon } from "./ui";
 import type { View } from "../lib/model";
 
-export default function Dashboard() {
-  const [view, setView] = useState<View>("board");
+export default function Dashboard({ initialView = "board" }: { initialView?: View }) {
+  const [view, setView] = useState<View>(initialView);
   const [slug, setSlug] = useState<string | null>(null);
 
   const go = (next: View) => {
@@ -30,6 +31,7 @@ export default function Dashboard() {
           items={[
             { label: "Ringkasan", icon: <HomeIcon />, onClick: () => go("board"), current: view === "board" },
             { label: "Sektor", icon: <GridIcon />, onClick: () => go("detail"), current: view === "detail" },
+            { label: "SGX × IDX", icon: <SwapIcon />, onClick: () => go("compare"), current: view === "compare" },
             {
               label: "Cara kerja",
               icon: <BookIcon />,
@@ -46,6 +48,7 @@ export default function Dashboard() {
           {view === "detail" && (
             <DetailView key={slug} slug={slug} onBack={() => go("board")} onOpenSector={openSector} />
           )}
+          {view === "compare" && <CompareView />}
           {view === "methodology" && <MethodologyView onNavigate={go} />}
         </main>
       </div>

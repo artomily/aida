@@ -222,7 +222,7 @@ export function correlationSeries(slug: string): number[] {
 export const chartX = (i: number) => (i / 59) * 300;
 export const chartY = (val: number) => 126 - ((val - 0.05) / 0.75) * 112;
 
-export type View = "board" | "detail" | "methodology";
+export type View = "board" | "detail" | "compare" | "methodology";
 
 /**
  * Mean |z| across all sectors for the last 30 sessions — the board's dispersion.

@@ -98,6 +98,13 @@ export const InfoIcon = () => (
   </svg>
 );
 
+/** Two arrows passing — the SGX × IDX comparison. */
+export const SwapIcon = () => (
+  <svg viewBox="0 0 20 20" aria-hidden="true">
+    <path d="M3 6.5h13M12.5 3l3.5 3.5-3.5 3.5M17 13.5H4M7.5 10 4 13.5 7.5 17" {...STROKE} strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 export const QuestionIcon = () => (
   <svg viewBox="0 0 20 20" aria-hidden="true">
     <circle cx="10" cy="10" r="8.6" {...STROKE} />
