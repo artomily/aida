@@ -1,5 +1,7 @@
-export const POS = "#d19a3f";
-export const NEG = "#b0564a";
+/** Mirrors --pos / --neg in globals.css — SVG charts need the literal value. */
+export const POS = "#3a6aa8";
+export const NEG = "#b24a33";
+export const NEUTRAL = "#a7b4c6";
 
 export const DIVERGENT_THRESHOLD = 2.0;
 export const WATCH_THRESHOLD = 1.0;
@@ -8,9 +10,16 @@ export type Status = "DIVERGENT" | "WATCH" | "NORMAL";
 
 /** Status keys stay English in code; only what the reader sees is translated. */
 export const STATUS_LABEL: Record<Status, string> = {
-  DIVERGENT: "MENYIMPANG",
-  WATCH: "PANTAU",
-  NORMAL: "NORMAL",
+  DIVERGENT: "Tidak biasa",
+  WATCH: "Perlu dipantau",
+  NORMAL: "Sesuai perkiraan",
+};
+
+/** One plain sentence per status, for readers who have never seen a z-score. */
+export const STATUS_HINT: Record<Status, string> = {
+  DIVERGENT: "Geraknya jauh dari perkiraan — jarang terjadi, layak dicek beritanya.",
+  WATCH: "Sedikit menyimpang dari perkiraan — belum tentu berarti apa-apa.",
+  NORMAL: "Bergerak kurang lebih seperti yang diperkirakan model.",
 };
 
 export type Sector = {
@@ -171,22 +180,6 @@ export function seededRandom(seed: string) {
 export function statusOf(z: number): Status {
   const az = Math.abs(z);
   return az >= DIVERGENT_THRESHOLD ? "DIVERGENT" : az >= WATCH_THRESHOLD ? "WATCH" : "NORMAL";
-}
-
-export function badgeStyle(status: Status, pos: boolean): React.CSSProperties {
-  const c = status === "DIVERGENT" ? (pos ? POS : NEG) : status === "WATCH" ? "#9a938a" : "#6f6960";
-  return {
-    display: "inline-block",
-    padding: "2px 8px",
-    fontFamily: "var(--font-mono)",
-    fontSize: "9.5px",
-    letterSpacing: "0.12em",
-    color: c,
-    border: "1px solid " + c,
-    borderRadius: "2px",
-    width: "fit-content",
-    opacity: status === "NORMAL" ? 0.7 : 1,
-  };
 }
 
 export type Contributor = {

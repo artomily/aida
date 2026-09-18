@@ -2,38 +2,15 @@
 
 import { NEG, POS } from "../lib/model";
 import { formatCompactIDR, formatIDR, type CompanyReport } from "../lib/companies";
+import { Arrow, Glass, SectionHead } from "./ui";
 
-const MUTED = "#8a847c";
-const DIM = "#6f6960";
-const RULE = "1px solid #24211d";
-const SOFT = "1px solid #1a1815";
+const comma = (v: number, d: number) => v.toFixed(d).replace(".", ",");
 
-const label = {
-  fontFamily: "var(--font-mono)",
-  fontSize: 10,
-  letterSpacing: "0.14em",
-  color: MUTED,
-} as const;
-
-const value = {
-  fontFamily: "var(--font-mono)",
-  fontSize: 13,
-  color: "#ded9d1",
-} as const;
-
-function Figure({ k, v, color }: { k: string; v: string; color?: string }) {
+function Figure({ k, v, hint, color }: { k: string; v: string; hint?: string; color?: string }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        gap: 12,
-        borderBottom: SOFT,
-        padding: "7px 0",
-      }}
-    >
-      <span style={{ ...label, letterSpacing: "0.08em" }}>{k}</span>
-      <span style={{ ...value, color: color ?? "#ded9d1" }}>{v}</span>
+    <div className="ds-kv" title={hint}>
+      <span>{k}</span>
+      <span style={color ? { color } : undefined}>{v}</span>
     </div>
   );
 }
@@ -42,7 +19,7 @@ function Figure({ k, v, color }: { k: string; v: string; color?: string }) {
 function Intraday({ report, up }: { report: CompanyReport; up: boolean }) {
   const pts = report.intraday;
   const W = 300;
-  const H = 96;
+  const H = 110;
   const lo = Math.min(...pts, report.prevClose);
   const hi = Math.max(...pts, report.prevClose);
   const pad = (hi - lo) * 0.12 || 1;
@@ -53,18 +30,24 @@ function Intraday({ report, up }: { report: CompanyReport; up: boolean }) {
   const color = up ? POS : NEG;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: "100%", height: 96, display: "block" }}>
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="none"
+      style={{ width: "100%", height: H, display: "block" }}
+      role="img"
+      aria-label={`Harga dari 09:00 sampai 10:04, terakhir ${formatIDR(report.last)}`}
+    >
       <line
         x1="0"
         y1={Y(report.prevClose)}
         x2={W}
         y2={Y(report.prevClose)}
-        stroke="#34302b"
+        stroke="#a7b4c6"
         strokeWidth="1"
-        strokeDasharray="2 4"
+        strokeDasharray="3 4"
         vectorEffect="non-scaling-stroke"
       />
-      <path d={`${line} L${W} ${H} L0 ${H} Z`} fill={up ? "rgba(209,154,63,0.10)" : "rgba(176,86,74,0.10)"} />
+      <path d={`${line} L${W} ${H} L0 ${H} Z`} fill={up ? "rgba(58,106,168,0.12)" : "rgba(178,74,51,0.10)"} />
       <path
         d={line}
         fill="none"
@@ -79,7 +62,7 @@ function Intraday({ report, up }: { report: CompanyReport; up: boolean }) {
         cy={Y(pts[pts.length - 1])}
         r="4"
         fill={color}
-        stroke="#0c0b0a"
+        stroke="#fff"
         strokeWidth="2"
         vectorEffect="non-scaling-stroke"
       />
@@ -94,125 +77,87 @@ export default function CompanyReportPanel({ report }: { report: CompanyReport }
   const foreignBuy = report.foreignNet >= 0;
 
   return (
-    <section style={{ borderTop: RULE, marginTop: 22, paddingTop: 20 }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginBottom: 16 }}>
-        <h2
-          style={{
-            margin: 0,
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: "0.16em",
-            color: "#e8e5e0",
-          }}
-        >
-          {report.ticker}
-        </h2>
-        <span style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#98918a" }}>
-          {report.name}
-        </span>
-        <div style={{ flex: 1 }} />
-        <span style={{ ...label, color: DIM }}>LAPORAN EMITEN · 10:04 WIB</span>
-      </div>
+    <Glass delay={500} style={{ marginTop: 0 }}>
+      <SectionHead
+        title={
+          <>
+            {report.ticker} <span style={{ fontWeight: 400, color: "var(--muted)" }}>· {report.name}</span>
+          </>
+        }
+        note="Laporan singkat perusahaan pukul 10:04 WIB."
+      />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr)",
-          gap: 28,
-        }}
-      >
+      <div className="ds-report">
         <div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 12, marginBottom: 14 }}>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 34,
-                fontWeight: 500,
-                lineHeight: 1,
-                color: "#f0ece5",
-              }}
-            >
-              {formatIDR(report.last)}
-            </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: col, paddingBottom: 3 }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 14, flexWrap: "wrap", marginBottom: 12 }}>
+            <div className="ds-num ds-num--sm">{formatIDR(report.last)}</div>
+            <div className="tnum" style={{ fontSize: 16, fontWeight: 520, color: col, paddingBottom: 4 }}>
+              <Arrow v={report.change} />
               {sign}
               {formatIDR(Math.abs(report.change))} ({sign}
-              {Math.abs(report.changePct).toFixed(2).replace(".", ",")}%)
+              {comma(Math.abs(report.changePct), 2)}%)
             </div>
           </div>
-          <Figure k="PEMBUKAAN" v={formatIDR(report.open)} />
-          <Figure k="TERTINGGI" v={formatIDR(report.high)} />
-          <Figure k="TERENDAH" v={formatIDR(report.low)} />
-          <Figure k="PENUTUPAN KEMARIN" v={formatIDR(report.prevClose)} />
-          <Figure k="BOBOT INDEKS" v={report.indexWeight.toFixed(1).replace(".", ",") + "%"} />
+          <Figure k="Harga pembukaan" v={formatIDR(report.open)} />
+          <Figure k="Tertinggi hari ini" v={formatIDR(report.high)} />
+          <Figure k="Terendah hari ini" v={formatIDR(report.low)} />
+          <Figure k="Penutupan kemarin" v={formatIDR(report.prevClose)} />
+          <Figure k="Porsi di indeks sektor" v={comma(report.indexWeight, 1) + "%"} />
         </div>
 
         <div>
-          <div style={{ ...label, marginBottom: 12 }}>LIKUIDITAS &amp; VALUASI</div>
-          <Figure k="VOLUME" v={formatIDR(report.volumeLot) + " lot"} />
-          <Figure k="NILAI" v={formatCompactIDR(report.value)} />
-          <Figure k="FREKUENSI" v={formatIDR(report.frequency) + "×"} />
-          <Figure k="KAPITALISASI" v={formatCompactIDR(report.marketCap)} />
-          <Figure k="PER" v={report.per.toFixed(1).replace(".", ",") + "×"} />
-          <Figure k="PBV" v={report.pbv.toFixed(2).replace(".", ",") + "×"} />
+          <h3 className="ds-h2" style={{ fontSize: 16, marginBottom: 6 }}>
+            Ramai tidaknya & harga wajar
+          </h3>
+          <Figure k="Volume" v={formatIDR(report.volumeLot) + " lot"} hint="1 lot = 100 lembar saham" />
+          <Figure k="Nilai transaksi" v={"Rp " + formatCompactIDR(report.value)} />
+          <Figure k="Jumlah transaksi" v={formatIDR(report.frequency) + "×"} />
+          <Figure k="Nilai perusahaan" v={"Rp " + formatCompactIDR(report.marketCap)} hint="Kapitalisasi pasar" />
+          <Figure k="PER" v={comma(report.per, 1) + "×"} hint="Harga dibanding laba per saham" />
+          <Figure k="PBV" v={comma(report.pbv, 2) + "×"} hint="Harga dibanding nilai buku" />
           <Figure
-            k="NET ASING"
-            v={(foreignBuy ? "BELI " : "JUAL ") + formatCompactIDR(Math.abs(report.foreignNet))}
+            k="Investor asing"
+            v={(foreignBuy ? "Beli bersih Rp " : "Jual bersih Rp ") + formatCompactIDR(Math.abs(report.foreignNet))}
             color={foreignBuy ? POS : NEG}
           />
         </div>
 
         <div>
-          <div style={{ ...label, marginBottom: 10 }}>INTRADAY · 09:00 → 10:04</div>
+          <h3 className="ds-h2" style={{ fontSize: 16, marginBottom: 12 }}>
+            Pergerakan harga 09:00 → 10:04
+          </h3>
           <Intraday report={report} up={up} />
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: DIM,
-              marginTop: 6,
-            }}
+            className="tnum"
+            style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "#7c869d", marginTop: 8 }}
           >
             <span>09:00</span>
-            <span>— — — PENUTUPAN KEMARIN {formatIDR(report.prevClose)}</span>
+            <span>┄ penutupan kemarin {formatIDR(report.prevClose)}</span>
             <span>10:04</span>
           </div>
 
-          <div style={{ ...label, margin: "20px 0 10px 0" }}>CATATAN SESI</div>
-          <div style={{ display: "grid", gap: 10 }}>
-            {report.notes.map((n, i) => (
-              <div key={i} style={{ display: "flex", gap: 12, borderBottom: SOFT, paddingBottom: 9 }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: col, paddingTop: 2 }}>
-                  {n.time}
-                </span>
-                <div>
-                  <div style={{ fontFamily: "var(--font-sans)", fontSize: 12.5, color: "#ded9d1" }}>
-                    {n.text}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 9.5,
-                      letterSpacing: "0.12em",
-                      color: DIM,
-                      marginTop: 3,
-                    }}
-                  >
-                    {n.source}
-                  </div>
+          <h3 className="ds-h2" style={{ fontSize: 16, margin: "22px 0 4px" }}>
+            Catatan sesi
+          </h3>
+          {report.notes.map((n, i) => (
+            <div key={i} style={{ display: "flex", gap: 14, padding: "10px 0", borderBottom: "1px solid rgba(120,145,180,0.18)" }}>
+              <span className="tnum" style={{ fontSize: 13, fontWeight: 560, color: col, paddingTop: 1 }}>
+                {n.time}
+              </span>
+              <div>
+                <div style={{ fontSize: 14.5, lineHeight: 1.45, color: "var(--ink-soft)" }}>{n.text}</div>
+                <div style={{ fontSize: 12, color: "#7c869d", marginTop: 3 }}>
+                  {n.source.charAt(0) + n.source.slice(1).toLowerCase()}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div style={{ ...label, color: DIM, marginTop: 16, letterSpacing: "0.1em" }}>
-        DATA CONTOH · AKAN DIGANTI FEED EMITEN SAAT API TERSEDIA
-      </div>
-    </section>
+      <p className="ds-note" style={{ margin: "18px 0 0" }}>
+        Data contoh — akan diganti data perusahaan asli saat feed tersedia.
+      </p>
+    </Glass>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Glass, SectionHead } from "./ui";
 import {
   NEG,
+  NEUTRAL,
   POS,
   SECTORS,
   dispersionSeries,
@@ -14,34 +16,17 @@ import {
   type Status,
 } from "../lib/model";
 
-const SURFACE = "#0c0b0a";
-const GRID = "#1e1b18";
-const RULE = "1px solid #24211d";
-const MUTED = "#8a847c";
-const DIM = "#6f6960";
-const NORMAL_INK = "#6f6960";
-
-const panelTitle = {
-  margin: 0,
-  fontFamily: "var(--font-mono)",
-  fontSize: 11,
-  fontWeight: 600,
-  letterSpacing: "0.16em",
-  color: "#e8e5e0",
-} as const;
-
-const panelNote = {
-  fontFamily: "var(--font-mono)",
-  fontSize: 10,
-  color: "#7d776f",
-  marginTop: 4,
-  marginBottom: 14,
-} as const;
+const SURFACE = "#ffffff";
+const GRID = "rgba(120,145,180,0.18)";
+const BASELINE = "#a7b4c6";
+const MUTED = "#59627e";
+const DIM = "#7c869d";
+const NORMAL_INK = NEUTRAL;
 
 const axisLabel = {
-  fontFamily: "var(--font-mono)",
-  fontSize: 9,
+  fontSize: 10.5,
   fill: MUTED,
+  fontVariantNumeric: "tabular-nums",
 } as const;
 
 type Tip = { x: number; y: number; title: string; lines: string[] } | null;
@@ -63,32 +48,13 @@ function columnPath(x: number, w: number, base: number, value: number, r = 4) {
   } ${bottom} Q${x + w} ${bottom} ${x + w} ${bottom - radius} L${x + w} ${top} Z`;
 }
 
-function Tooltip({ tip }: { tip: Tip }) {
+export function Tooltip({ tip }: { tip: Tip }) {
   if (!tip) return null;
   return (
-    <div
-      style={{
-        position: "absolute",
-        left: tip.x,
-        top: tip.y,
-        transform: "translate(-50%, -100%)",
-        pointerEvents: "none",
-        background: "#151310",
-        border: "1px solid #322d28",
-        padding: "7px 9px",
-        fontFamily: "var(--font-mono)",
-        fontSize: 10.5,
-        lineHeight: 1.6,
-        color: "#ded9d1",
-        whiteSpace: "nowrap",
-        zIndex: 4,
-      }}
-    >
-      <div style={{ color: "#e8e5e0", letterSpacing: "0.08em" }}>{tip.title}</div>
+    <div className="ds-tip" style={{ left: tip.x, top: tip.y }}>
+      <b>{tip.title}</b>
       {tip.lines.map((l) => (
-        <div key={l} style={{ color: MUTED }}>
-          {l}
-        </div>
+        <div key={l}>{l}</div>
       ))}
     </div>
   );
@@ -119,7 +85,7 @@ function ResidualColumns() {
     <div ref={box} style={{ position: "relative" }}>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: 168, display: "block" }}>
         <line x1="0" y1={BASE - 72} x2={W} y2={BASE - 72} stroke={GRID} strokeWidth="1" />
-        <line x1="0" y1={BASE} x2={W} y2={BASE} stroke="#34302b" strokeWidth="1" />
+        <line x1="0" y1={BASE} x2={W} y2={BASE} stroke={BASELINE} strokeWidth="1" />
         <line x1="0" y1={BASE + 72} x2={W} y2={BASE + 72} stroke={GRID} strokeWidth="1" />
         <text x="2" y={BASE - 76} style={axisLabel}>
           +{maxAbs.toFixed(1)}%
@@ -138,14 +104,14 @@ function ResidualColumns() {
               <path
                 d={columnPath(x, barW, BASE, d.r * scale)}
                 fill={color}
-                opacity={d.status === "NORMAL" ? 0.55 : 1}
+                opacity={d.status === "NORMAL" ? 0.7 : 1}
               />
               {extremes.has(d.slug) && (
                 <text
                   x={x + barW / 2}
                   y={pos ? BASE - Math.abs(d.r) * scale - 7 : BASE + Math.abs(d.r) * scale + 14}
                   textAnchor="middle"
-                  style={{ ...axisLabel, fill: "#ded9d1" }}
+                  style={{ ...axisLabel, fill: "#020c21", fontWeight: 560 }}
                 >
                   {fmt(d.r)}
                 </text>
@@ -175,11 +141,11 @@ function ResidualColumns() {
                     // Clamped so the tooltip never runs off either edge of the panel.
                     x: Math.min(Math.max(t.left - b.left + t.width / 2, 78), b.width - 78),
                     y: (bar ? bar.top - b.top : 0) - 8,
-                    title: d.name.toUpperCase(),
+                    title: d.name,
                     lines: [
-                      `RESIDUAL ${fmt(d.r)}`,
-                      `Z-SCORE  ${fmtZ(d.z)}`,
-                      `STATUS   ${STATUS_LABEL[d.status]}`,
+                      `Selisih dari perkiraan: ${fmt(d.r)}`,
+                      `Skor tidak biasa: ${fmtZ(d.z)}`,
+                      STATUS_LABEL[d.status],
                     ],
                   });
                 }}
@@ -230,8 +196,8 @@ function DispersionLine() {
           setTip({
             x: rect.left - b.left + (i / (pts.length - 1)) * rect.width,
             y: rect.top - b.top + 6,
-            title: i === pts.length - 1 ? "HARI INI" : `T−${pts.length - 1 - i}`,
-            lines: [`RERATA |z|  ${pts[i].toFixed(2)}`],
+            title: i === pts.length - 1 ? "Hari ini" : `${pts.length - 1 - i} hari lalu`,
+            lines: [`Rata-rata skor: ${pts[i].toFixed(2)}`],
           });
         }}
         onMouseLeave={() => {
@@ -241,8 +207,8 @@ function DispersionLine() {
       >
         <line x1="0" y1={Y(1.0)} x2={W} y2={Y(1.0)} stroke={GRID} strokeWidth="1" />
         <line x1="0" y1={Y(0.5)} x2={W} y2={Y(0.5)} stroke={GRID} strokeWidth="1" />
-        <line x1="0" y1={BOTTOM} x2={W} y2={BOTTOM} stroke="#2a2622" strokeWidth="1" />
-        <path d={area} fill="rgba(209,154,63,0.10)" stroke="none" />
+        <line x1="0" y1={BOTTOM} x2={W} y2={BOTTOM} stroke={BASELINE} strokeWidth="1" />
+        <path d={area} fill="rgba(58,106,168,0.12)" stroke="none" />
         <path
           d={line}
           fill="none"
@@ -258,7 +224,7 @@ function DispersionLine() {
             y1={TOP}
             x2={X(hover)}
             y2={BOTTOM}
-            stroke="#4a443c"
+            stroke={BASELINE}
             strokeWidth="1"
             vectorEffect="non-scaling-stroke"
           />
@@ -274,18 +240,18 @@ function DispersionLine() {
         />
       </svg>
       <div
+        className="tnum"
         style={{
           display: "flex",
           justifyContent: "space-between",
-          fontFamily: "var(--font-mono)",
-          fontSize: 10,
+          fontSize: 12.5,
           color: DIM,
-          marginTop: 8,
+          marginTop: 10,
         }}
       >
-        <span>T−29</span>
-        <span>RERATA 30 HARI {mean.toFixed(2)}</span>
-        <span style={{ color: POS }}>HARI INI {today.toFixed(2)}</span>
+        <span>30 hari lalu</span>
+        <span>Rata-rata {mean.toFixed(2)}</span>
+        <span style={{ color: POS, fontWeight: 560 }}>Hari ini {today.toFixed(2)}</span>
       </div>
       <Tooltip tip={tip} />
     </div>
@@ -303,14 +269,14 @@ function StatusMix() {
   const counts = statusMix();
   const total = SECTORS.length;
   const order: { key: Status; color: string; note: string }[] = [
-    { key: "DIVERGENT", color: POS, note: "|z| ≥ 2,0" },
-    { key: "WATCH", color: "#9a938a", note: "|z| 1,0 – 2,0" },
-    { key: "NORMAL", color: NORMAL_INK, note: "|z| < 1,0" },
+    { key: "DIVERGENT", color: "#0f1b31", note: "skor ≥ 2,0" },
+    { key: "WATCH", color: "#5f88b4", note: "skor 1,0 – 2,0" },
+    { key: "NORMAL", color: "#dde4ee", note: "skor < 1,0" },
   ];
 
   return (
     <div ref={box} style={{ position: "relative" }}>
-      <div style={{ display: "flex", gap: 2, height: 26 }}>
+      <div style={{ display: "flex", gap: 4, height: 30 }}>
         {order.map((o) => {
           const n = counts[o.key];
           if (!n) return null;
@@ -320,7 +286,7 @@ function StatusMix() {
               style={{
                 flex: n,
                 background: o.color,
-                opacity: o.key === "NORMAL" ? 0.55 : 1,
+                borderRadius: 999,
                 cursor: "default",
               }}
               onMouseEnter={(e) => {
@@ -340,34 +306,37 @@ function StatusMix() {
         })}
       </div>
 
-      <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+      <div style={{ display: "grid", marginTop: 14 }}>
         {order.map((o) => (
           <div
             key={o.key}
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 9,
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              borderBottom: "1px solid #1a1815",
-              paddingBottom: 8,
+              gap: 10,
+              fontSize: 14,
+              borderBottom: "1px solid rgba(120,145,180,0.18)",
+              padding: "10px 0",
             }}
           >
             <span
               style={{
-                width: 9,
-                height: 9,
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
                 background: o.color,
-                opacity: o.key === "NORMAL" ? 0.55 : 1,
+                boxShadow: "inset 0 0 0 1px rgba(120,145,180,0.3)",
                 display: "inline-block",
+                flex: "none",
               }}
             />
-            <span style={{ color: "#ded9d1", letterSpacing: "0.1em" }}>{STATUS_LABEL[o.key]}</span>
-            <span style={{ color: DIM, fontSize: 10 }}>{o.note}</span>
+            <span style={{ display: "grid", gap: 2 }}>
+              <span style={{ color: "var(--ink)", fontWeight: 500 }}>{STATUS_LABEL[o.key]}</span>
+              <span style={{ color: DIM, fontSize: 12.5 }}>{o.note}</span>
+            </span>
             <span style={{ flex: 1 }} />
-            <span style={{ color: "#ded9d1" }}>{counts[o.key]}</span>
-            <span style={{ color: MUTED, fontSize: 10 }}>
+            <span className="tnum" style={{ color: "var(--ink)", fontWeight: 560 }}>{counts[o.key]}</span>
+            <span className="tnum" style={{ color: MUTED, fontSize: 12.5, width: 34, textAlign: "right" }}>
               {((counts[o.key] / total) * 100).toFixed(0)}%
             </span>
           </div>
@@ -380,34 +349,32 @@ function StatusMix() {
 
 export default function BoardCharts() {
   return (
-    <section
-      style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(0, 1.9fr) minmax(0, 1.1fr) minmax(0, 1fr)",
-        borderBottom: RULE,
-      }}
-    >
-      <div style={{ padding: "22px 28px 22px 0", borderRight: RULE }}>
-        <h2 style={panelTitle}>RESIDUAL PER SEKTOR</h2>
-        <div style={panelNote}>
-          REALISASI − EKSPEKTASI, pp · <span style={{ color: POS }}>■</span> DI ATAS EKSPEKTASI ·{" "}
-          <span style={{ color: NEG }}>■</span> DI BAWAH · <span style={{ color: DIM }}>■</span>{" "}
-          DALAM AMBANG NORMAL
-        </div>
+    <div className="ds-grid ds-charts">
+      <Glass delay={480}>
+        <SectionHead
+          title="Selisih tiap sektor hari ini"
+          note={
+            <>
+              Batang ke atas <span style={{ color: POS }}>▲</span> = lebih kuat dari perkiraan, ke bawah{" "}
+              <span style={{ color: NEG }}>▼</span> = lebih lemah. Abu-abu = masih wajar.
+            </>
+          }
+        />
         <ResidualColumns />
-      </div>
+      </Glass>
 
-      <div style={{ padding: "22px 28px", borderRight: RULE }}>
-        <h2 style={panelTitle}>DISPERSI · 30 SESI</h2>
-        <div style={panelNote}>RATA-RATA |z| SELURUH SEKTOR PER SESI</div>
+      <Glass delay={520}>
+        <SectionHead
+          title="Seberapa ramai hari ini?"
+          note="Rata-rata skor 'tidak biasa' semua sektor, 30 hari terakhir. Makin tinggi, makin banyak kejutan."
+        />
         <DispersionLine />
-      </div>
+      </Glass>
 
-      <div style={{ padding: "22px 0 22px 28px" }}>
-        <h2 style={panelTitle}>KOMPOSISI STATUS</h2>
-        <div style={panelNote}>11 SEKTOR IDX PAGI INI</div>
+      <Glass delay={560}>
+        <SectionHead title="Ringkasan status" note="Pembagian 11 sektor IDX pagi ini." />
         <StatusMix />
-      </div>
-    </section>
+      </Glass>
+    </div>
   );
 }

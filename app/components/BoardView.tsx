@@ -7,29 +7,36 @@ import {
   NEG,
   POS,
   SECTORS,
-  badgeStyle,
   fmt,
   fmtZ,
   statusOf,
+  STATUS_HINT,
   STATUS_LABEL,
   type Status,
+  type View,
 } from "../lib/model";
+import { Arrow, Glass, GuidePill, Hero, MeterPanel, SectionHead, SplitBar, StatRow, StatusBadge, TargetIcon } from "./ui";
 
 type SortKey = "name" | "e" | "a" | "r" | "z" | "s";
 
-const COLUMNS: { key: SortKey; label: string; align: "left" | "right"; w: string }[] = [
-  { key: "name", label: "SEKTOR", align: "left", w: "auto" },
-  { key: "e", label: "EKSPEKTASI", align: "right", w: "110px" },
-  { key: "a", label: "REALISASI", align: "right", w: "110px" },
-  { key: "r", label: "RESIDUAL", align: "right", w: "120px" },
-  { key: "z", label: "Z-SCORE", align: "right", w: "210px" },
-  { key: "s", label: "STATUS", align: "left", w: "130px" },
+const COLUMNS: { key: SortKey; label: string; hint: string; align: "left" | "right" }[] = [
+  { key: "name", label: "Sektor", hint: "11 sektor IDX", align: "left" },
+  { key: "e", label: "Perkiraan", hint: "menurut model", align: "right" },
+  { key: "a", label: "Kenyataan", hint: "pukul 10:04", align: "right" },
+  { key: "r", label: "Selisih", hint: "kenyataan − perkiraan", align: "right" },
+  { key: "z", label: "Seberapa tidak biasa", hint: "skor z, 0 = biasa", align: "right" },
+  { key: "s", label: "Status", hint: "", align: "left" },
 ];
 
 const STATUS_RANK: Record<Status, number> = { DIVERGENT: 2, WATCH: 1, NORMAL: 0 };
-const CELL_BORDER = "1px solid #1a1815";
 
-export default function BoardView({ onOpenSector }: { onOpenSector: (slug: string) => void }) {
+export default function BoardView({
+  onOpenSector,
+  onNavigate,
+}: {
+  onOpenSector: (slug: string) => void;
+  onNavigate: (view: View) => void;
+}) {
   const [sortKey, setSortKey] = useState<SortKey>("z");
   const [dir, setDir] = useState<"asc" | "desc">("desc");
 
@@ -58,17 +65,9 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
   }, [sortKey, dir]);
 
   const divergent = rows.filter((d) => d.status === "DIVERGENT");
-  const names = divergent.map((d) => d.name).join(" dan ");
-
-  const metrics = [
-    { label: "RATA-RATA KORELASI BERGULIR", value: "0,48", note: "60 HARI · vs −0,03 WoW" },
-    { label: "R² MODEL", value: "0,31", note: "LUAR SAMPEL 0,27" },
-    {
-      label: "SEKTOR MENYIMPANG",
-      value: String(divergent.length),
-      note: "|z| ≥ " + DIVERGENT_THRESHOLD.toFixed(1),
-    },
-  ];
+  const up = divergent.filter((d) => d.r >= 0).map((d) => d.name);
+  const down = divergent.filter((d) => d.r < 0).map((d) => d.name);
+  const n = divergent.length;
 
   const sortBy = (key: SortKey) => {
     if (key === sortKey) setDir(dir === "desc" ? "asc" : "desc");
@@ -78,166 +77,151 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
     }
   };
 
+  const tag =
+    n === 0
+      ? "Semua sektor bergerak kurang lebih seperti perkiraan."
+      : [
+          up.length ? `${up.join(" dan ")} lebih kuat` : "",
+          down.length ? `${down.join(" dan ")} lebih lemah` : "",
+        ]
+          .filter(Boolean)
+          .join(", ") + " dari perkiraan.";
+
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr)",
-        width: "100%",
-        padding: "0 28px",
-      }}
-    >
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 2.1fr) minmax(0, 1fr)",
-          borderBottom: "1px solid #24211d",
-        }}
-      >
-        <div style={{ padding: "22px 28px 24px 0", borderRight: "1px solid #24211d" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              letterSpacing: "0.16em",
-              color: "#8a847c",
-              marginBottom: 12,
-            }}
-          >
-            RINGKASAN PAGI · PRA-PEMBUKAAN
-          </div>
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-serif)",
-              fontSize: 21,
-              lineHeight: 1.55,
-              color: "#ded9d1",
-              textWrap: "pretty",
-              textAlign: "justify",
-              hyphens: "auto",
-            }}
-          >
-            Sinyal regional pagi ini konstruktif tapi tipis — Nikkei +0,6%, KOSPI +0,4%, dan futures
-            Hang Seng bergerak datar setelah data kredit Tiongkok. Model memperkirakan pembukaan IDX
-            yang rata-rata melebar ke arah positif, dengan beban terbesar pada Teknologi dan Barang
-            Baku. Realisasi pukul 10:04 memperlihatkan {divergent.length || "nol"} sektor
-            menyimpang di luar ambang: {names || "tidak ada"}. Energi menyerap dorongan harga batu
-            bara termal yang tidak tercermin di variabel kontrol regional, sementara pelemahan
-            Kesehatan terkonsentrasi pada dua emiten berkapitalisasi besar — residual yang lebih
-            layak dibaca sebagai peristiwa emiten, bukan rotasi sektor.
+    <>
+      <Hero
+        eyebrow={
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            Ringkasan pagi · Selasa, 15 Sep 2026
+            <span className="ds-chip ds-pill" style={{ height: 30, padding: "0 12px", fontSize: 13 }}>
+              <i />
+              Diperbarui 10:04 WIB
+            </span>
+          </span>
+        }
+        title={
+          n === 0 ? (
+            <>
+              Pasar bergerak
+              <br />
+              sesuai perkiraan
+            </>
+          ) : (
+            <>
+              {n} sektor bergerak
+              <br />
+              di luar perkiraan
+            </>
+          )
+        }
+        tag={tag}
+        aside={
+          <MeterPanel
+            title="Ketepatan model"
+            icon={<TargetIcon />}
+            sub={
+              <>
+                Pasar Asia menjelaskan
+                <br />
+                sekitar 31% gerak IDX
+                <br />
+                di jam pertama.
+              </>
+            }
+            scale={["0%", "25%", "50%", "75%", "100%"]}
+            fill={0.31}
+            label="Ketepatan model 31 persen"
+          />
+        }
+      />
+
+      <div className="ds-statrow">
+        <StatRow
+          items={[
+            { value: n, label: <>Sektor di luar<br />perkiraan</> },
+            { value: "0,48", label: <>Kaitan dengan<br />pasar Asia</> },
+            { value: SECTORS.length, label: <>Sektor<br />dipantau</> },
+          ]}
+        />
+        <GuidePill onClick={() => onNavigate("methodology")}>Cara membaca angka</GuidePill>
+      </div>
+
+      <div className="ds-grid ds-split">
+        <Glass delay={350}>
+          <SectionHead title="Apa yang terjadi pagi ini?" />
+          <p className="ds-body">
+            Bursa Asia yang buka lebih dulu cenderung positif tapi tipis — Nikkei naik 0,6% dan KOSPI
+            0,4%. Dari situ model memperkirakan IDX dibuka sedikit menguat. Kenyataannya pukul 10:04,{" "}
+            {n ? <strong style={{ fontWeight: 560 }}>{n} sektor</strong> : "tidak ada sektor yang"}{" "}
+            bergerak jauh dari perkiraan. <strong style={{ fontWeight: 560 }}>Energi</strong> naik jauh
+            lebih tinggi karena harga batu bara, sesuatu yang tidak terlihat dari bursa Asia.{" "}
+            <strong style={{ fontWeight: 560 }}>Kesehatan</strong> turun, tetapi penurunannya hanya dari
+            dua perusahaan besar — lebih mirip berita perusahaan daripada pergeseran seluruh sektor.
           </p>
-        </div>
-        <div
-          style={{
-            padding: "22px 0 24px 28px",
-            display: "grid",
-            gap: 16,
-            alignContent: "start",
-          }}
-        >
-          {metrics.map((m) => (
-            <div key={m.label} style={{ display: "grid", gap: 5 }}>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  letterSpacing: "0.14em",
-                  color: "#8a847c",
-                }}
-              >
-                {m.label}
+        </Glass>
+        <Glass delay={420}>
+          <SectionHead title="Cara membaca papan ini" />
+          <ol className="ds-steps" style={{ gridTemplateColumns: "minmax(0, 1fr)", gap: 16 }}>
+            <li style={{ gridTemplateColumns: "34px 1fr", columnGap: 14 }}>
+              <b>1</b>
+              <div>
+                <strong>Model membuat perkiraan</strong>
+                <p>Berdasarkan bursa Asia yang sudah buka, berapa seharusnya tiap sektor naik atau turun.</p>
               </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-                <div
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 24,
-                    fontWeight: 500,
-                    color: "#e8e5e0",
-                    lineHeight: 1,
-                  }}
-                >
-                  {m.value}
-                </div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#7d776f" }}>
-                  {m.note}
-                </div>
+            </li>
+            <li style={{ gridTemplateColumns: "34px 1fr", columnGap: 14 }}>
+              <b>2</b>
+              <div>
+                <strong>Kami bandingkan dengan kenyataan</strong>
+                <p>Selisihnya menunjukkan ada hal lokal yang tidak dijelaskan pasar luar.</p>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            </li>
+            <li style={{ gridTemplateColumns: "34px 1fr", columnGap: 14 }}>
+              <b>3</b>
+              <div>
+                <strong>Selisih besar = layak dicek</strong>
+                <p>Bukan sinyal beli atau jual — hanya penunjuk ke mana perhatian diarahkan.</p>
+              </div>
+            </li>
+          </ol>
+        </Glass>
+      </div>
 
       <BoardCharts />
 
-      <section style={{ padding: "22px 0 0 0" }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 12 }}>
-          <h2
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "0.16em",
-              color: "#e8e5e0",
-            }}
-          >
-            PAPAN DIVERGENSI
-          </h2>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#7d776f" }}>
-            11 SEKTOR IDX · KLIK JUDUL KOLOM UNTUK MENGURUTKAN
-          </div>
-          <div style={{ flex: 1 }} />
-          <div
-            style={{
-              display: "flex",
-              gap: 18,
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "#7d776f",
-            }}
-          >
-            <span>
-              <span style={{ color: POS }}>■</span> RESIDUAL POSITIF
-            </span>
-            <span>
-              <span style={{ color: NEG }}>■</span> RESIDUAL NEGATIF
-            </span>
-          </div>
-        </div>
+      <Glass delay={560}>
+        <SectionHead
+          title="Semua sektor"
+          note="Klik nama sektor untuk melihat perusahaan penggeraknya. Klik judul kolom untuk mengurutkan."
+          right={
+            <div className="ds-legend" style={{ paddingTop: 4 }}>
+              <span>
+                <i style={{ background: POS }} />▲ Lebih kuat dari perkiraan
+              </span>
+              <span>
+                <i style={{ background: NEG }} />▼ Lebih lemah dari perkiraan
+              </span>
+            </div>
+          }
+        />
 
-        <div style={{ overflowX: "auto" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontFamily: "var(--font-mono)",
-              fontSize: "12.5px",
-            }}
-          >
+        <div className="ds-table-wrap">
+          <table className="ds-table">
             <thead>
-              <tr style={{ borderTop: "1px solid #24211d", borderBottom: "1px solid #24211d" }}>
+              <tr>
                 {COLUMNS.map((c) => (
                   <th
                     key={c.key}
-                    className="dv-th"
-                    onClick={() => sortBy(c.key)}
-                    style={{
-                      padding: "9px 12px",
-                      paddingLeft: c.key === "s" ? 20 : 12,
-                      textAlign: c.align,
-                      width: c.w,
-                      cursor: "pointer",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      letterSpacing: "0.13em",
-                      color: sortKey === c.key ? POS : "#8a847c",
-                      whiteSpace: "nowrap",
-                      userSelect: "none",
-                    }}
+                    style={{ textAlign: c.align }}
+                    aria-sort={sortKey === c.key ? (dir === "desc" ? "descending" : "ascending") : undefined}
                   >
-                    {c.label + (sortKey === c.key ? (dir === "desc" ? "  ▼" : "  ▲") : "")}
+                    <button type="button" onClick={() => sortBy(c.key)}>
+                      {c.label}
+                      <span aria-hidden="true" style={{ fontSize: 10, opacity: sortKey === c.key ? 1 : 0.3 }}>
+                        {sortKey === c.key && dir === "asc" ? "▲" : "▼"}
+                      </span>
+                    </button>
+                    {c.hint && <small>{c.hint}</small>}
                   </th>
                 ))}
               </tr>
@@ -245,130 +229,38 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
             <tbody>
               {rows.map((d) => {
                 const pos = d.r >= 0;
-                const col = d.status === "NORMAL" ? "#ded9d1" : pos ? POS : NEG;
-                const half = Math.min(Math.abs(d.z) / 3, 1) * 50;
-                const bold = d.status === "DIVERGENT" ? 600 : 400;
+                const col = d.status === "NORMAL" ? undefined : pos ? POS : NEG;
+                const bold = d.status === "DIVERGENT" ? 600 : 450;
                 return (
-                  <tr
-                    key={d.slug}
-                    className="dv-row"
-                    style={{
-                      borderLeft: `2px solid ${
-                        d.status === "DIVERGENT" ? (pos ? POS : NEG) : "transparent"
-                      }`,
-                      background: "transparent",
-                      transition: "background 120ms ease",
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: "0 12px",
-                        height: 38,
-                        verticalAlign: "middle",
-                        borderBottom: CELL_BORDER,
-                      }}
-                    >
-                      <a
-                        href="#"
+                  <tr key={d.slug} className="is-click" onClick={() => onOpenSector(d.slug)}>
+                    <td>
+                      <button
+                        type="button"
+                        className="ds-link"
                         onClick={(e) => {
-                          e.preventDefault();
+                          e.stopPropagation();
                           onOpenSector(d.slug);
-                        }}
-                        style={{
-                          fontFamily: "var(--font-sans)",
-                          fontSize: 13,
-                          color: "#ded9d1",
                         }}
                       >
                         {d.name}
-                      </a>
+                      </button>
                     </td>
-                    <td
-                      style={{
-                        padding: "0 12px",
-                        textAlign: "right",
-                        color: "#8a847c",
-                        borderBottom: CELL_BORDER,
-                      }}
-                    >
-                      {fmt(d.e)}
-                    </td>
-                    <td
-                      style={{
-                        padding: "0 12px",
-                        textAlign: "right",
-                        color: "#ded9d1",
-                        borderBottom: CELL_BORDER,
-                      }}
-                    >
-                      {fmt(d.a)}
-                    </td>
-                    <td
-                      style={{
-                        padding: "0 12px",
-                        textAlign: "right",
-                        verticalAlign: "middle",
-                        color: col,
-                        fontWeight: bold,
-                        borderBottom: CELL_BORDER,
-                      }}
-                    >
+                    <td style={{ textAlign: "right", color: "var(--muted)" }}>{fmt(d.e)}</td>
+                    <td style={{ textAlign: "right" }}>{fmt(d.a)}</td>
+                    <td style={{ textAlign: "right", color: col, fontWeight: bold }}>
+                      <Arrow v={d.r} />
                       {fmt(d.r)}
                     </td>
-                    <td style={{ padding: "0 12px", borderBottom: CELL_BORDER }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        <div
-                          style={{
-                            position: "relative",
-                            width: 132,
-                            height: 7,
-                            background: "#151310",
-                            border: "1px solid #221f1c",
-                          }}
-                        >
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: -3,
-                              bottom: -3,
-                              left: "50%",
-                              width: 1,
-                              background: "#34302b",
-                            }}
-                          />
-                          <div
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              bottom: 0,
-                              left: pos ? "50%" : `${50 - half}%`,
-                              width: `${half}%`,
-                              background: pos ? POS : NEG,
-                              opacity: d.status === "NORMAL" ? 0.42 : 0.92,
-                            }}
-                          />
-                        </div>
-                        <div
-                          style={{
-                            width: 48,
-                            textAlign: "right",
-                            color: col,
-                            fontWeight: bold,
-                          }}
-                        >
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "flex-end" }}>
+                        <SplitBar ratio={d.z / 3} faded={d.status === "NORMAL"} />
+                        <span style={{ width: 40, textAlign: "right", color: col, fontWeight: bold }}>
                           {fmtZ(d.z)}
-                        </div>
+                        </span>
                       </div>
                     </td>
-                    <td style={{ padding: "0 12px 0 20px", borderBottom: CELL_BORDER }}>
-                      <span style={badgeStyle(d.status, pos)}>{STATUS_LABEL[d.status]}</span>
+                    <td title={STATUS_HINT[d.status]}>
+                      <StatusBadge status={d.status} pos={pos} />
                     </td>
                   </tr>
                 );
@@ -376,27 +268,25 @@ export default function BoardView({ onOpenSector }: { onOpenSector: (slug: strin
             </tbody>
           </table>
         </div>
-      </section>
 
-      <footer
-        style={{
-          marginTop: 28,
-          borderTop: "1px solid #24211d",
-          padding: "16px 0 26px 0",
-          display: "flex",
-          gap: 28,
-          flexWrap: "wrap",
-          fontFamily: "var(--font-mono)",
-          fontSize: 10,
-          letterSpacing: "0.06em",
-          color: "#6f6960",
-        }}
-      >
-        <span>SUMBER · API SEKTOR IDX, FEED INDEKS REGIONAL (PENUTUPAN T−1)</span>
-        <span>MODEL · OLS, JENDELA BERGULIR 120 HARI</span>
-        <div style={{ flex: 1 }} />
-        <span>BUKAN NASIHAT INVESTASI. UNTUK RISET INTERNAL.</span>
+        <div className="ds-legend" style={{ marginTop: 18 }}>
+          {(["DIVERGENT", "WATCH", "NORMAL"] as Status[]).map((s) => (
+            <span key={s}>
+              <strong style={{ fontWeight: 560, color: "var(--ink)" }}>{STATUS_LABEL[s]}</strong>
+              {s === "DIVERGENT"
+                ? `skor ≥ ${DIVERGENT_THRESHOLD.toFixed(1).replace(".", ",")}`
+                : s === "WATCH"
+                  ? "skor 1,0 – 2,0"
+                  : "skor di bawah 1,0"}
+            </span>
+          ))}
+        </div>
+      </Glass>
+
+      <footer className="ds-footer">
+        <span>Sumber: data sektor IDX dan indeks regional (penutupan hari sebelumnya).</span>
+        <span>Bukan nasihat investasi. Untuk riset internal.</span>
       </footer>
-    </div>
+    </>
   );
 }

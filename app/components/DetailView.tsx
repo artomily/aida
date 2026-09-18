@@ -4,10 +4,10 @@ import { useState } from "react";
 import CompanyReportPanel from "./CompanyReportPanel";
 import { getCompanyReport } from "../lib/companies";
 import {
+  DIVERGENT_THRESHOLD,
   NEG,
   POS,
   SECTORS,
-  badgeStyle,
   chartX,
   chartY,
   contributorsOf,
@@ -16,29 +16,29 @@ import {
   fmtPP,
   fmtZ,
   statusOf,
-  STATUS_LABEL,
+  STATUS_HINT,
 } from "../lib/model";
+import { Arrow, Cta, Glass, Hero, MeterPanel, SectionHead, SplitBar, StatRow, StatusBadge, TargetIcon } from "./ui";
 
-const CELL_BORDER = "1px solid #1a1815";
-const HEAD_CELL = {
-  fontSize: 10,
-  fontWeight: 600,
-  letterSpacing: "0.13em",
-  color: "#8a847c",
-} as const;
+/** With no sector picked, open the one furthest from the model — that is why anyone came here. */
+const MOST_UNUSUAL = [...SECTORS].sort((a, b) => Math.abs(b.z) - Math.abs(a.z))[0];
+
+const move = (v: number) => (v > 0 ? "naik" : v < 0 ? "turun" : "datar");
 
 export default function DetailView({
   slug,
   onBack,
+  onOpenSector,
 }: {
   slug: string | null;
   onBack: () => void;
+  onOpenSector: (slug: string) => void;
 }) {
-  const sector = SECTORS.find((s) => s.slug === slug) ?? SECTORS[1];
+  const sector = SECTORS.find((s) => s.slug === slug) ?? MOST_UNUSUAL;
   const r = +(sector.a - sector.e).toFixed(2);
   const status = statusOf(sector.z);
   const pos = r >= 0;
-  const col = status === "NORMAL" ? "#ded9d1" : pos ? POS : NEG;
+  const col = status === "NORMAL" ? undefined : pos ? POS : NEG;
 
   const contributors = contributorsOf(sector);
   const maxContrib = Math.max(...contributors.map((c) => Math.abs(c.contribV)), 1);
@@ -55,305 +55,153 @@ export default function DetailView({
     .join(" ");
   const areaPath = linePath + " L300 140 L0 140 Z";
   const last = pts[pts.length - 1];
-
-  const figures = [
-    { label: "EKSPEKTASI", value: fmt(sector.e), note: "FIT MODEL 10:00", color: "#8a847c", bold: 400 },
-    { label: "REALISASI", value: fmt(sector.a), note: "INDEKS 10:04 WIB", color: "#ded9d1", bold: 400 },
-    { label: "RESIDUAL", value: fmt(r), note: "REALISASI − EKSPEKTASI", color: col, bold: 600 },
-  ];
+  const mean = pts.reduce((a, b) => a + b, 0) / pts.length;
 
   const stats = [
-    { label: "ρ TERKINI", value: last.toFixed(2) },
-    { label: "RERATA 60 HARI", value: (pts.reduce((a, b) => a + b, 0) / pts.length).toFixed(2) },
-    {
-      label: "RENTANG 60 HARI",
-      value: Math.min(...pts).toFixed(2) + " – " + Math.max(...pts).toFixed(2),
-    },
-    {
-      label: "σ RESIDUAL (120 HARI)",
-      value: (Math.abs(r / (sector.z || 1)) || 0.5).toFixed(2) + "%",
-    },
+    { label: "Keterkaitan hari ini", value: last.toFixed(2) },
+    { label: "Rata-rata 60 hari", value: mean.toFixed(2) },
+    { label: "Rentang 60 hari", value: Math.min(...pts).toFixed(2) + " – " + Math.max(...pts).toFixed(2) },
+    { label: "Gerak harian normal", value: "± " + (Math.abs(r / (sector.z || 1)) || 0.5).toFixed(2) + "%" },
   ];
 
+  const others = SECTORS.filter((s) => s.slug !== sector.slug).sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr)",
-        width: "100%",
-        padding: "0 28px 40px 28px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 9,
-          padding: "16px 0",
-          fontFamily: "var(--font-mono)",
-          fontSize: 10,
-          letterSpacing: "0.12em",
-          color: "#7d776f",
-        }}
-      >
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            onBack();
-          }}
-          style={{ color: "#8a847c" }}
-        >
-          PAPAN
-        </a>
-        <span>/</span>
-        <span style={{ color: "#ded9d1" }}>{sector.name.toUpperCase()}</span>
+    <>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 28 }}>
+        <Cta variant="back" onClick={onBack}>
+          Semua sektor
+        </Cta>
+        <label className="ds-chip ds-pill" style={{ paddingRight: 8 }}>
+          <span>Pindah sektor</span>
+          <select
+            value={sector.slug}
+            onChange={(e) => onOpenSector(e.target.value)}
+            style={{
+              font: "inherit",
+              fontWeight: 520,
+              color: "var(--ink)",
+              background: "transparent",
+              border: 0,
+              padding: "6px 4px",
+              cursor: "pointer",
+            }}
+          >
+            {[sector, ...others].map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.5fr)",
-          borderTop: "1px solid #24211d",
-          borderBottom: "1px solid #24211d",
-        }}
-      >
-        <div style={{ padding: "26px 28px 28px 0", borderRight: "1px solid #24211d" }}>
-          <h1
-            style={{
-              margin: "0 0 4px 0",
-              fontFamily: "var(--font-serif)",
-              fontSize: 34,
-              fontWeight: 400,
-              lineHeight: 1.1,
-              color: "#f0ece5",
-            }}
-          >
-            {sector.name}
-          </h1>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              letterSpacing: "0.14em",
-              color: "#7d776f",
-              marginBottom: 18,
-            }}
-          >
-            INDEKS SEKTOR IDX · {sector.code}
-          </div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 14 }}>
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 68,
-                fontWeight: 500,
-                lineHeight: 0.85,
-                color: col,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              {fmtZ(sector.z)}
-            </div>
-            <div style={{ display: "grid", gap: 4, paddingBottom: 8 }}>
-              <span style={badgeStyle(status, pos)}>{STATUS_LABEL[status]}</span>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  color: "#7d776f",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Z-SCORE · σ RESIDUAL 120 HARI
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-            alignContent: "center",
-          }}
-        >
-          {figures.map((f) => (
-            <div key={f.label} style={{ padding: "26px 20px 28px 28px" }}>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  letterSpacing: "0.14em",
-                  color: "#8a847c",
-                  marginBottom: 8,
-                }}
-              >
-                {f.label}
-              </div>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 26,
-                  color: f.color,
-                  fontWeight: f.bold,
-                }}
-              >
-                {f.value}
-              </div>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  color: "#6f6960",
-                  marginTop: 6,
-                }}
-              >
-                {f.note}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <Hero
+        eyebrow={`Sektor · kode indeks ${sector.code}`}
+        title={sector.name}
+        tag={
+          <>
+            Model memperkirakan sektor ini {move(sector.e)} {fmt(Math.abs(sector.e)).replace(/^[+−]/, "")}, kenyataannya{" "}
+            {move(sector.a)} {fmt(Math.abs(sector.a)).replace(/^[+−]/, "")}.
+          </>
+        }
+        aside={
+          <MeterPanel
+            title="Seberapa tidak biasa"
+            dot={col ?? "#a7b4c6"}
+            icon={<TargetIcon />}
+            big={<span style={{ color: col }}>{fmtZ(sector.z)}</span>}
+            sub={
+              <>
+                <StatusBadge status={status} pos={pos} />
+                <span style={{ display: "block", marginTop: 10, fontSize: 14.5, lineHeight: 1.4 }}>
+                  {STATUS_HINT[status]}
+                </span>
+              </>
+            }
+            scale={["0", "1", "2", "3+"]}
+            fill={Math.abs(sector.z) / 3}
+            label={`Skor tidak biasa ${fmtZ(sector.z)} dari 3`}
+          />
+        }
+      />
 
-      <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 2.05fr) minmax(0, 1fr)" }}>
-        <div style={{ padding: "22px 28px 0 0", borderRight: "1px solid #24211d" }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginBottom: 12 }}>
-            <h2
-              style={{
-                margin: 0,
-                fontFamily: "var(--font-mono)",
-                fontSize: 11,
-                fontWeight: 600,
-                letterSpacing: "0.16em",
-                color: "#e8e5e0",
-              }}
-            >
-              KONTRIBUTOR
-            </h2>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#7d776f" }}>
-              8 TERATAS MENURUT BOBOT INDEKS · KONTRIBUSI DALAM pp RESIDUAL · KLIK EMITEN UNTUK LAPORAN
-            </div>
-          </div>
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontFamily: "var(--font-mono)",
-                fontSize: "12.5px",
-              }}
-            >
+      <div className="ds-statrow">
+        <StatRow
+          small
+          items={[
+            { value: fmt(sector.e), label: <>Perkiraan<br />model</> },
+            { value: fmt(sector.a), label: <>Kenyataan<br />pukul 10:04</> },
+            {
+              value: (
+                <>
+                  <Arrow v={r} />
+                  {fmt(r)}
+                </>
+              ),
+              label: <>Selisih dari<br />perkiraan</>,
+              color: col,
+            },
+          ]}
+        />
+      </div>
+
+      <div className="ds-grid ds-split">
+        <Glass delay={350}>
+          <SectionHead
+            title="Siapa penggeraknya?"
+            note="8 perusahaan terbesar di sektor ini. Kolom kontribusi menunjukkan seberapa besar tiap perusahaan mendorong selisih. Klik baris untuk laporan perusahaan."
+          />
+          <div className="ds-table-wrap">
+            <table className="ds-table">
               <thead>
-                <tr style={{ borderTop: "1px solid #24211d", borderBottom: "1px solid #24211d" }}>
-                  <th style={{ ...HEAD_CELL, padding: "9px 12px 9px 0", textAlign: "left", width: 78 }}>
-                    KODE
+                <tr>
+                  <th style={{ textAlign: "left" }}>Kode</th>
+                  <th style={{ textAlign: "left" }}>Perusahaan</th>
+                  <th style={{ textAlign: "right" }}>
+                    Return<small>hari ini</small>
                   </th>
-                  <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "left" }}>NAMA</th>
-                  <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "right", width: 92 }}>
-                    RETURN
+                  <th style={{ textAlign: "right" }}>
+                    Bobot<small>di indeks</small>
                   </th>
-                  <th style={{ ...HEAD_CELL, padding: "9px 12px", textAlign: "right", width: 84 }}>
-                    BOBOT
-                  </th>
-                  <th style={{ ...HEAD_CELL, padding: "9px 0 9px 12px", textAlign: "left", width: 210 }}>
-                    KONTRIBUSI
+                  <th style={{ textAlign: "right" }}>
+                    Kontribusi<small>ke selisih, poin %</small>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {contributors.map((c) => {
                   const cp = c.contribV >= 0;
-                  const half = (Math.abs(c.contribV) / maxContrib) * 50;
                   const isActive = c.ticker === activeTicker;
                   return (
                     <tr
                       key={c.ticker}
-                      className="dv-row"
+                      className="is-click"
+                      data-active={isActive || undefined}
+                      tabIndex={0}
+                      aria-selected={isActive}
                       onClick={() => setPicked(c.ticker)}
-                      style={{
-                        cursor: "pointer",
-                        background: isActive ? "#161412" : "transparent",
-                        borderLeft: `2px solid ${isActive ? POS : "transparent"}`,
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setPicked(c.ticker);
+                        }
                       }}
                     >
-                      <td
-                        style={{
-                          padding: "0 12px 0 0",
-                          height: 34,
-                          verticalAlign: "middle",
-                          color: "#ded9d1",
-                          borderBottom: CELL_BORDER,
-                        }}
-                      >
-                        {c.ticker}
-                      </td>
-                      <td
-                        style={{
-                          padding: "0 12px",
-                          fontFamily: "var(--font-sans)",
-                          color: "#98918a",
-                          borderBottom: CELL_BORDER,
-                        }}
-                      >
-                        {c.company}
-                      </td>
-                      <td
-                        style={{
-                          padding: "0 12px",
-                          textAlign: "right",
-                          verticalAlign: "middle",
-                          color: c.retV >= 0 ? "#ded9d1" : "#c08a82",
-                          borderBottom: CELL_BORDER,
-                        }}
-                      >
+                      <td style={{ fontWeight: 560, color: "var(--ink)" }}>{c.ticker}</td>
+                      <td style={{ color: "var(--muted2)" }}>{c.company}</td>
+                      <td style={{ textAlign: "right", color: c.retV < 0 ? NEG : undefined }}>
                         {fmt(c.retV)}
                       </td>
-                      <td
-                        style={{
-                          padding: "0 12px",
-                          textAlign: "right",
-                          color: "#8a847c",
-                          borderBottom: CELL_BORDER,
-                        }}
-                      >
+                      <td style={{ textAlign: "right", color: "var(--muted)" }}>
                         {c.weightV.toFixed(1)}%
                       </td>
-                      <td style={{ padding: "0 0 0 12px", borderBottom: CELL_BORDER }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <div
-                            style={{
-                              position: "relative",
-                              width: 128,
-                              height: 7,
-                              background: "#151310",
-                              border: "1px solid #221f1c",
-                            }}
-                          >
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: -3,
-                                bottom: -3,
-                                left: "50%",
-                                width: 1,
-                                background: "#34302b",
-                              }}
-                            />
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: 0,
-                                bottom: 0,
-                                left: cp ? "50%" : `${50 - half}%`,
-                                width: `${half}%`,
-                                background: cp ? POS : NEG,
-                                opacity: 0.85,
-                              }}
-                            />
-                          </div>
-                          <div style={{ width: 52, textAlign: "right", color: cp ? POS : NEG }}>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "flex-end" }}>
+                          <SplitBar ratio={c.contribV / maxContrib} />
+                          <span style={{ width: 52, textAlign: "right", color: cp ? POS : NEG, fontWeight: 520 }}>
                             {fmtPP(c.contribV)}
-                          </div>
+                          </span>
                         </div>
                       </td>
                     </tr>
@@ -362,108 +210,71 @@ export default function DetailView({
               </tbody>
             </table>
           </div>
-        </div>
+        </Glass>
 
-        <div style={{ padding: "22px 0 0 28px" }}>
-          <h2
-            style={{
-              margin: "0 0 4px 0",
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "0.16em",
-              color: "#e8e5e0",
-            }}
-          >
-            KORELASI BERGULIR
-          </h2>
-          <div
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "#7d776f",
-              marginBottom: 16,
-            }}
-          >
-            60 HARI vs KOMPOSIT REGIONAL
-          </div>
+        <Glass delay={420}>
+          <SectionHead
+            title="Seberapa ikut pasar Asia?"
+            note="Keterkaitan sektor ini dengan bursa Asia selama 60 hari (0 = tidak terkait, 1 = bergerak persis sama)."
+          />
           <svg
             viewBox="0 0 300 140"
             preserveAspectRatio="none"
             style={{ width: "100%", height: 140, display: "block" }}
+            role="img"
+            aria-label={`Keterkaitan 60 hari, terakhir ${last.toFixed(2)}`}
           >
-            <line x1="0" y1="14" x2="300" y2="14" stroke="#1e1b18" strokeWidth="1" />
-            <line
-              x1="0"
-              y1="70"
-              x2="300"
-              y2="70"
-              stroke="#2a2622"
-              strokeWidth="1"
-              strokeDasharray="2 4"
+            <line x1="0" y1="14" x2="300" y2="14" stroke="rgba(120,145,180,0.18)" strokeWidth="1" />
+            <line x1="0" y1="70" x2="300" y2="70" stroke="#a7b4c6" strokeWidth="1" strokeDasharray="2 4" />
+            <line x1="0" y1="126" x2="300" y2="126" stroke="rgba(120,145,180,0.18)" strokeWidth="1" />
+            <path d={areaPath} fill="rgba(58,106,168,0.12)" stroke="none" />
+            <path
+              d={linePath}
+              fill="none"
+              stroke={POS}
+              strokeWidth="2"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
             />
-            <line x1="0" y1="126" x2="300" y2="126" stroke="#1e1b18" strokeWidth="1" />
-            <path d={areaPath} fill="rgba(209,154,63,0.10)" stroke="none" />
-            <path d={linePath} fill="none" stroke={POS} strokeWidth="1.4" />
-            <circle cx={chartX(59).toFixed(1)} cy={chartY(last).toFixed(1)} r="2.6" fill={POS} />
+            <circle
+              cx={chartX(59).toFixed(1)}
+              cy={chartY(last).toFixed(1)}
+              r="4"
+              fill={POS}
+              stroke="#fff"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+            />
           </svg>
           <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontFamily: "var(--font-mono)",
-              fontSize: 10,
-              color: "#6f6960",
-              marginTop: 8,
-            }}
+            className="tnum"
+            style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "#7c869d", marginTop: 8 }}
           >
-            <span>T−60</span>
-            <span>0.80</span>
-            <span>T</span>
+            <span>60 hari lalu</span>
+            <span>Hari ini</span>
           </div>
-          <div
-            style={{
-              borderTop: "1px solid #24211d",
-              marginTop: 18,
-              paddingTop: 14,
-              display: "grid",
-              gap: 10,
-            }}
-          >
+          <div style={{ marginTop: 14 }}>
             {stats.map((s) => (
-              <div
-                key={s.label}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 11,
-                }}
-              >
-                <span style={{ color: "#8a847c", letterSpacing: "0.08em" }}>{s.label}</span>
-                <span style={{ color: "#ded9d1" }}>{s.value}</span>
+              <div key={s.label} className="ds-kv">
+                <span>{s.label}</span>
+                <span>{s.value}</span>
               </div>
             ))}
           </div>
-          <p
-            style={{
-              margin: "18px 0 0 0",
-              fontFamily: "var(--font-serif)",
-              fontSize: 17,
-              lineHeight: 1.5,
-              color: "#b8b2a9",
-              textAlign: "justify",
-              hyphens: "auto",
-            }}
-          >
-            Korelasi sektor ini terhadap komposit regional melemah sejak pertengahan Agustus,
-            sehingga residual sebesar ini punya bobot lebih besar: semakin rendah ρ, semakin longgar
-            ekspektasi model dan semakin layak residual dibaca sebagai faktor domestik.
+          <p className="ds-note" style={{ margin: "16px 0 0", fontSize: 14.5 }}>
+            Keterkaitan sektor ini melemah sejak pertengahan Agustus. Artinya perkiraan model makin
+            longgar, dan selisih hari ini lebih mungkin berasal dari kabar dalam negeri. Skor di atas{" "}
+            {DIVERGENT_THRESHOLD.toFixed(1).replace(".", ",")} dianggap tidak biasa.
           </p>
-        </div>
-      </section>
+        </Glass>
+      </div>
 
       {report && <CompanyReportPanel report={report} />}
-    </div>
+
+      <footer className="ds-footer">
+        <span>Data contoh — akan diganti data asli saat feed tersedia.</span>
+        <span>Bukan nasihat investasi. Untuk riset internal.</span>
+      </footer>
+    </>
   );
 }

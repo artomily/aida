@@ -1,38 +1,27 @@
-import type { Metadata } from "next";
-import { Cormorant_Garamond, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const plexSans = IBM_Plex_Sans({
+// Variable Inter (100–900): the design leans on in-between weights like 360, 470 and 520.
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["400", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Divergence — pemantau residual sektor IDX",
+  title: "Divergence — pantau sektor IDX yang bergerak di luar perkiraan",
   description:
-    "Residual sektor IDX terhadap ekspektasi model dari sinyal pasar regional. Riset internal, bukan nasihat investasi.",
+    "Membandingkan gerak tiap sektor IDX dengan perkiraan dari pasar Asia pagi ini. Riset internal, bukan nasihat investasi.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#E6EDF6",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="id"
-      className={`${plexSans.variable} ${plexMono.variable} ${cormorant.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="id" className={`${inter.variable} h-full antialiased`}>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }

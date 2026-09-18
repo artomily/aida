@@ -1,98 +1,120 @@
 "use client";
 
-import type { View } from "../lib/model";
+import Link from "next/link";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { BrandMark, Cta } from "./ui";
 
-const NAV: [View, string][] = [
-  ["board", "PAPAN"],
-  ["detail", "SEKTOR"],
-  ["methodology", "METODOLOGI"],
-];
+export type NavItem = {
+  label: string;
+  icon: ReactNode;
+  href?: string;
+  onClick?: () => void;
+  current?: boolean;
+  /** Draw the hairline divider before this item. */
+  divider?: boolean;
+};
 
+/**
+ * Brand · centred glass nav pill · dark CTA. Collapses to a burger under 900px with the
+ * landing hero's contract: outside click, Escape, or widening the frame closes it.
+ */
 export default function Header({
-  view,
-  onNavigate,
+  items,
+  cta,
+  onBrand,
 }: {
-  view: View;
-  onNavigate: (view: View) => void;
+  items: NavItem[];
+  cta: { label: string; href?: string; onClick?: () => void };
+  onBrand?: () => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const burger = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!menu.current?.contains(t) && !burger.current?.contains(t)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      burger.current?.focus();
+    };
+    const wide = matchMedia("(min-width: 901px)");
+    const onWide = (e: MediaQueryListEvent) => e.matches && setOpen(false);
+    document.addEventListener("click", onClick);
+    document.addEventListener("keydown", onKey);
+    wide.addEventListener("change", onWide);
+    return () => {
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("keydown", onKey);
+      wide.removeEventListener("change", onWide);
+    };
+  }, [open]);
+
+  const run = (fn?: () => void) => {
+    setOpen(false);
+    fn?.();
+  };
+
   return (
-    <header
-      style={{
-        display: "flex",
-        alignItems: "baseline",
-        gap: 24,
-        padding: "14px 28px",
-        borderBottom: "1px solid #24211d",
-        position: "sticky",
-        top: 0,
-        background: "#0c0b0a",
-        zIndex: 5,
-        flexWrap: "wrap",
-      }}
-    >
-      <a
-        href="#"
+    <header className="ds-header ds-enter">
+      <Link
+        className="ds-brand"
+        href="/"
         onClick={(e) => {
+          if (!onBrand) return;
           e.preventDefault();
-          onNavigate("board");
-        }}
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 15,
-          fontWeight: 600,
-          letterSpacing: "0.22em",
-          color: "#e8e5e0",
+          run(onBrand);
         }}
       >
-        DIVERGENCE
-      </a>
-      <div style={{ width: 1, height: 14, background: "#2c2824" }} />
-      <nav style={{ display: "flex", gap: 20 }}>
-        {NAV.map(([key, label]) => (
-          <a
-            key={key}
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate(key);
-            }}
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "10.5px",
-              letterSpacing: "0.14em",
-              color: view === key ? "#e8e5e0" : "#7d776f",
-              borderBottom: `1px solid ${view === key ? "#d19a3f" : "transparent"}`,
-              paddingBottom: 3,
-            }}
-          >
-            {label}
-          </a>
-        ))}
-      </nav>
-      <div style={{ flex: 1 }} />
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#8a847c" }}>
-        DATA 15 SEP 2026
-      </div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 7,
-          fontFamily: "var(--font-mono)",
-          fontSize: 11,
-          color: "#d19a3f",
+        <BrandMark />
+        <b>Divergence</b>
+      </Link>
+
+      <button
+        ref={burger}
+        className="ds-burger ds-pill"
+        type="button"
+        aria-label={open ? "Tutup menu" : "Buka menu"}
+        aria-expanded={open}
+        aria-controls="site-menu"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
         }}
       >
-        <span
-          style={{
-            width: 5,
-            height: 5,
-            borderRadius: "50%",
-            background: "#d19a3f",
-            display: "inline-block",
-          }}
-        />
-        Diperbarui 10:04 WIB
+        <i />
+        <i />
+      </button>
+
+      <div ref={menu} id="site-menu" className="ds-menu ds-pill" data-open={open || undefined}>
+        <nav className="ds-nav ds-pill" aria-label="Utama">
+          {items.map((n) => (
+            <span key={n.label} style={{ display: "contents" }}>
+              {n.divider && <hr />}
+              <a
+                href={n.href ?? "#"}
+                aria-current={n.current ? "page" : undefined}
+                onClick={(e) => {
+                  if (n.onClick) e.preventDefault();
+                  run(n.onClick);
+                }}
+              >
+                {n.icon}
+                {n.label}
+              </a>
+            </span>
+          ))}
+        </nav>
+
+        <div className="ds-header-end">
+          <Cta href={cta.href} onClick={cta.onClick ? () => run(cta.onClick) : () => setOpen(false)} passthrough={!cta.onClick}>
+            {cta.label}
+          </Cta>
+        </div>
       </div>
     </header>
   );
