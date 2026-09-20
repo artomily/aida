@@ -61,6 +61,50 @@ const SGX: [string, string, SectorSlug][] = [
   ["C52", "ComfortDelGro", "transportation"],
 ];
 
+/*
+ * Sub-sector per sample ticker, in each exchange's own vocabulary (IDX-IC for IDX, SGX's
+ * industry labels for SGX) — the same kind of labels sectors.app returns in `sub_sector`.
+ */
+const SUB: Record<string, string> = {
+  // IDX
+  BBCA: "Banks", BBRI: "Banks", BMRI: "Banks", BBNI: "Banks", BRIS: "Banks", ARTO: "Banks", BTPS: "Banks", BJBR: "Banks", NISP: "Banks",
+  ADRO: "Coal", PTBA: "Coal", ITMG: "Coal", HRUM: "Coal", INDY: "Coal", MEDC: "Oil & Gas", PGAS: "Oil & Gas", AKRA: "Oil & Gas",
+  ANTM: "Metals & Minerals", INCO: "Metals & Minerals", MDKA: "Metals & Minerals", TPIA: "Chemicals", BRPT: "Chemicals",
+  SMGR: "Construction Materials", INKP: "Forestry & Paper", TKIM: "Forestry & Paper",
+  ASII: "Multi-sector Holdings", UNTR: "Industrial Goods", ARNA: "Industrial Goods", IMPC: "Industrial Goods", KRAS: "Industrial Goods",
+  JECC: "Industrial Goods", MARK: "Industrial Goods", GJTL: "Automobiles & Components",
+  MAPI: "Retailing", ACES: "Retailing", MAPA: "Retailing", ERAA: "Retailing", RALS: "Retailing", LPPF: "Retailing",
+  MNCN: "Media & Entertainment", SCMA: "Media & Entertainment",
+  ICBP: "Food & Beverage", INDF: "Food & Beverage", MYOR: "Food & Beverage", CPIN: "Food & Beverage", JPFA: "Food & Beverage",
+  SMAR: "Agricultural Products", SIMP: "Agricultural Products", LSIP: "Agricultural Products", AALI: "Agricultural Products",
+  UNVR: "Nondurable Household Products", AMRT: "Food & Staples Retailing", GGRM: "Tobacco",
+  KLBF: "Pharmaceuticals", SIDO: "Pharmaceuticals", DVLA: "Pharmaceuticals", PEHA: "Pharmaceuticals",
+  MIKA: "Healthcare Providers", HEAL: "Healthcare Providers", SILO: "Healthcare Providers", PRDA: "Healthcare Providers",
+  GOTO: "Software & IT Services", DCII: "Software & IT Services", EMTK: "Software & IT Services", MLPT: "Software & IT Services",
+  WIFI: "Software & IT Services", EDGE: "Software & IT Services", TOSK: "Software & IT Services", MTDL: "Technology Hardware & Equipment",
+  TLKM: "Telecommunication", TOWR: "Telecommunication", ISAT: "Telecommunication", EXCL: "Telecommunication",
+  JSMR: "Transportation Infrastructure", PGEO: "Utilities", ADHI: "Heavy Constructions & Civil Engineering",
+  WIKA: "Heavy Constructions & Civil Engineering",
+  BSDE: "Properties & Real Estate", CTRA: "Properties & Real Estate", PWON: "Properties & Real Estate", SMRA: "Properties & Real Estate",
+  DMAS: "Properties & Real Estate", LPKR: "Properties & Real Estate", APLN: "Properties & Real Estate", KIJA: "Properties & Real Estate",
+  DUTI: "Properties & Real Estate",
+  ASSA: "Transportation", BIRD: "Transportation", SMDR: "Transportation", TMAS: "Transportation", IPCM: "Transportation",
+  CMPP: "Transportation", HELI: "Transportation", WEHA: "Transportation",
+  // SGX
+  D05: "Banks & Credit Services", O39: "Banks & Credit Services", U11: "Banks & Credit Services", S68: "Financial Data & Stock Exchanges",
+  RE4: "Coal", "5WH": "Oil & Gas E&P", S20: "Industrial Metals & Mining",
+  J36: "Conglomerates", C07: "Conglomerates", BN4: "Conglomerates", S63: "Aerospace & Defense", "5E2": "Shipbuilding", BS6: "Shipbuilding",
+  G13: "Resorts & Casinos", LJ3: "Lodging",
+  F34: "Farm Products", E5H: "Farm Products", "5JS": "Farm Products", EB5: "Farm Products", P8Z: "Farm Products",
+  OV8: "Grocery Stores", Y92: "Beverages",
+  BSL: "Medical Care Facilities", H02: "Drug Manufacturers",
+  V03: "Electronic Components", "558": "Semiconductor Equipment", AWX: "Semiconductor Equipment",
+  Z74: "Telecom Services", CC3: "Telecom Services", CJLU: "Telecom Services", U96: "Utilities",
+  C38U: "REIT - Retail", D5IU: "REIT - Retail", "9CI": "Real Estate Services", U14: "Real Estate - Diversified",
+  C09: "Real Estate - Development", A26: "Real Estate - Development",
+  C6L: "Airlines", S58: "Airports & Air Services", C52: "Ground Transportation",
+};
+
 const today = () => new Date().toISOString().slice(0, 10);
 
 function moves(exchange: Exchange, rows: [string, string, SectorSlug][]): Stock[] {
@@ -76,7 +120,7 @@ function moves(exchange: Exchange, rows: [string, string, SectorSlug][]): Stock[
       name,
       exchange,
       sector,
-      subSector: null,
+      subSector: SUB[code] ?? null,
       marketCap: null,
       price: +(exchange === "IDX" ? 200 + rnd() * 9000 : 0.2 + rnd() * 40).toFixed(exchange === "IDX" ? 0 : 2),
       change,

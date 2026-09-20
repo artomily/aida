@@ -159,7 +159,7 @@ export async function fetchNews(
   const symbols = opts.symbols?.map((s) => s.replace(/\.(JK|SI)$/i, "")).join(",");
   const rows = await allPages<NewsRow>(
     path,
-    { symbols, start: opts.start },
+    { symbols, start: opts.start, extension: exchange === "IDX" ? "idx" : undefined },
     30,
     opts.revalidate ?? 120,
     opts.pages ?? 2,
@@ -218,4 +218,51 @@ export async function fetchCloses(symbol: string, days = 90): Promise<DailyRow[]
     43200,
   );
   return (Array.isArray(rows) ? rows : (rows.results ?? [])).map((r) => ({ date: r.date, close: +r.close }));
+}
+
+/* ── mining ownership tree (parents / subsidiaries) ── */
+
+export type OwnershipNode = { name: string; slug: string; symbol: string | null; stake: number | null };
+export type MiningTree = { slug: string; parents: OwnershipNode[]; subsidiaries: OwnershipNode[] };
+
+type MiningListRow = { slug: string; name: string; symbol: string | null };
+type MiningTreeRow = {
+  slug: string;
+  parents?: { name: string; slug: string; symbol?: string | null; percentage_ownership?: number | null }[] | null;
+  subsidiaries?: { name: string; slug: string; symbol?: string | null; percentage_ownership?: number | null }[] | null;
+};
+
+const node = (r: { name: string; slug: string; symbol?: string | null; percentage_ownership?: number | null }): OwnershipNode => {
+  const pct = num(r.percentage_ownership);
+  return {
+    name: r.name,
+    slug: r.slug,
+    symbol: r.symbol ? r.symbol.toUpperCase() : null,
+    // The mining tree reports whole percents (15.37), unlike the report section's decimals.
+    stake: pct === null ? null : pct > 1 ? pct / 100 : pct,
+  };
+};
+
+/** Mining slug for an IDX symbol, or null when the emiten is not in the mining extension. */
+export async function findMiningSlug(idxSymbol: string): Promise<string | null> {
+  const bare = idxSymbol.replace(/\.JK$/i, "").toUpperCase();
+  const page = await get<Page<MiningListRow>>("/mining/companies/", { keyword: bare, limit: 30 }, 604800);
+  const hit = (page.results ?? []).find((r) => (r.symbol ?? "").replace(/\.JK$/i, "").toUpperCase() === bare);
+  return hit?.slug ?? null;
+}
+
+/**
+ * Parent / subsidiary tree with stakes — the only sectors.app endpoint that exposes a corporate
+ * structure rather than a shareholder list, but it covers mining companies only. 2 credits
+ * (slug lookup + tree), cached a week; structure changes far slower than ownership percentages.
+ */
+export async function fetchMiningTree(idxSymbol: string): Promise<MiningTree | null> {
+  const slug = await findMiningSlug(idxSymbol);
+  if (!slug) return null;
+  const r = await get<MiningTreeRow>(`/mining/companies/ownership/${slug}/`, {}, 604800);
+  return {
+    slug: r.slug ?? slug,
+    parents: (r.parents ?? []).map(node),
+    subsidiaries: (r.subsidiaries ?? []).map(node),
+  };
 }

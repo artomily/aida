@@ -44,6 +44,16 @@ export default function CompareView() {
   const sector = picked ?? widest?.slug ?? "financials";
   const sameCount = rows.filter((r) => r.same).length;
 
+  // Picked sub-sector per exchange; tied to the sector it was picked in, so switching sector clears it.
+  const [sub, setSub] = useState<{ sector: SectorSlug; SGX: string | null; IDX: string | null }>({
+    sector,
+    SGX: null,
+    IDX: null,
+  });
+  const subFor = (ex: Exchange) => (sub.sector === sector ? sub[ex] : null);
+  const pickSub = (ex: Exchange, name: string | null) =>
+    setSub((s) => ({ ...(s.sector === sector ? s : { SGX: null, IDX: null }), sector, [ex]: name }));
+
   const stocks = useMemo(() => new Map([...(data?.idx ?? []), ...(data?.sgx ?? [])].map((s) => [s.symbol, s])), [data]);
 
   // Linked symbols in this sector go into the news query, so their news shows even if tagged elsewhere.
@@ -165,6 +175,24 @@ export default function CompareView() {
 
       <Glass delay={0} style={{ marginBottom: 20 }}>
         <SectionHead
+          title={`Subsektor ${SECTOR_NAME[sector]}`}
+          note="Tiap bursa memakai klasifikasi subsektornya sendiri. Klik subsektor untuk menyaring daftar saham di bawah."
+        />
+        <div className="ds-grid mk-pair" style={{ marginBottom: 0 }}>
+          {(["SGX", "IDX"] as Exchange[]).map((ex) => (
+            <SubsectorList
+              key={ex}
+              exchange={ex}
+              stocks={bySector[ex][sector]}
+              picked={subFor(ex)}
+              onPick={(name) => pickSub(ex, name)}
+            />
+          ))}
+        </div>
+      </Glass>
+
+      <Glass delay={0} style={{ marginBottom: 20 }}>
+        <SectionHead
           title={`Sektor ${SECTOR_NAME[sector]}: Singapura vs Indonesia`}
           note="Saham terbesar di tiap bursa, lalu berita terbaru sektor ini dari kedua bursa."
           right={
@@ -183,7 +211,14 @@ export default function CompareView() {
         <div className="mk-detail">
           <div className="mk-pair mk-pair--tight">
             {(["SGX", "IDX"] as Exchange[]).map((ex) => (
-              <StockTable key={ex} exchange={ex} stocks={bySector[ex][sector]} linked={new Set(sectorLinked)} />
+              <StockTable
+                key={`${ex}-${sector}-${subFor(ex)}`}
+                exchange={ex}
+                stocks={bySector[ex][sector].filter((s) => !subFor(ex) || s.subSector === subFor(ex))}
+                subSector={subFor(ex)}
+                onClearSub={() => pickSub(ex, null)}
+                linked={new Set(sectorLinked)}
+              />
             ))}
           </div>
           <SectorNews sector={sector} symbols={sectorLinked} people={links.data?.people} />
@@ -206,7 +241,88 @@ export default function CompareView() {
   );
 }
 
-function StockTable({ exchange, stocks, linked }: { exchange: Exchange; stocks: Stock[]; linked: Set<string> }) {
+const NO_SUB = "Tanpa subsektor";
+
+/** One exchange's sub-sectors inside the picked sector, largest first. */
+function SubsectorList({
+  exchange,
+  stocks,
+  picked,
+  onPick,
+}: {
+  exchange: Exchange;
+  stocks: Stock[];
+  picked: string | null;
+  onPick: (name: string | null) => void;
+}) {
+  const groups = new Map<string, Stock[]>();
+  for (const s of stocks) {
+    const k = s.subSector ?? NO_SUB;
+    groups.set(k, [...(groups.get(k) ?? []), s]);
+  }
+  const list = [...groups.entries()]
+    .map(([name, members]) => ({
+      name,
+      stats: sectorStats(members),
+      cap: members.reduce((a, m) => a + (m.marketCap ?? 0), 0),
+    }))
+    .sort((a, b) => b.cap - a.cap || b.stats.count - a.stats.count || a.name.localeCompare(b.name));
+
+  return (
+    <div>
+      <h3 className="ds-h2" style={{ fontSize: 16, marginBottom: 8 }}>
+        <span className={`mk-ex mk-ex--${exchange.toLowerCase()}`}>{exchange}</span> {list.length} subsektor
+      </h3>
+      {list.length === 0 ? (
+        <p className="ds-note">Tidak ada saham di sektor ini.</p>
+      ) : (
+        <div role="listbox" aria-label={`Subsektor ${exchange}`} className="mk-sectors">
+          {list.map((g) => {
+            const total = g.stats.up + g.stats.down || 1;
+            const selected = picked === g.name;
+            return (
+              <button
+                key={g.name}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                className="mk-sector"
+                onClick={() => onPick(selected ? null : g.name === NO_SUB ? null : g.name)}
+              >
+                <span className="mk-sector-name">
+                  {g.name}
+                  <small>{g.stats.count} saham</small>
+                </span>
+                <span className="mk-breadth" aria-label={`${g.stats.up} naik, ${g.stats.down} turun`}>
+                  <i style={{ width: `${(g.stats.up / total) * 100}%`, background: POS }} />
+                  <i style={{ width: `${(g.stats.down / total) * 100}%`, background: NEG }} />
+                </span>
+                <span className="mk-sector-chg tnum" style={{ color: tone(g.stats.avg) }}>
+                  {g.stats.avg != null && <Arrow v={g.stats.avg} />}
+                  {fmtChange(g.stats.avg)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StockTable({
+  exchange,
+  stocks,
+  linked,
+  subSector,
+  onClearSub,
+}: {
+  exchange: Exchange;
+  stocks: Stock[];
+  linked: Set<string>;
+  subSector: string | null;
+  onClearSub: () => void;
+}) {
   const [all, setAll] = useState(false);
   const sorted = [...stocks].sort((a, b) => (b.marketCap ?? 0) - (a.marketCap ?? 0));
   const shown = all ? sorted : sorted.slice(0, 8);
@@ -214,6 +330,11 @@ function StockTable({ exchange, stocks, linked }: { exchange: Exchange; stocks: 
     <div>
       <h3 className="ds-h2" style={{ fontSize: 16, marginBottom: 8 }}>
         <span className={`mk-ex mk-ex--${exchange.toLowerCase()}`}>{exchange}</span> {EXCHANGE_LABEL[exchange].long}
+        {subSector && (
+          <button type="button" className="mk-chip mk-chip--filter" onClick={onClearSub} aria-label={`Hapus filter ${subSector}`}>
+            {subSector} ✕
+          </button>
+        )}
       </h3>
       {shown.length === 0 ? (
         <p className="ds-note">Tidak ada saham di sektor ini.</p>

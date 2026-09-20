@@ -1769,3 +1769,23 @@ a.mk-news-title:hover {
     gap: 10px;
   }
 }
+
+.mk-chip--filter {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  margin-left: 8px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 520;
+  color: #fff;
+  background: var(--accent);
+  cursor: pointer;
+  vertical-align: 0.1em;
+}
+.mk-chip--filter:focus-visible {
+  outline: 2px solid #2f5f9e;
+  outline-offset: 2px;
+}

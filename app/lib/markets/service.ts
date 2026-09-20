@@ -6,7 +6,7 @@
 import { betaFromCloses, stakeBeta } from "./domino";
 import { SEED_LINKS } from "./links";
 import { sampleNews, sampleUniverse } from "./sample";
-import { fetchCloses, fetchNews, fetchOwnership, fetchUniverse, hasSectorsKey } from "./sectorsApp";
+import { fetchCloses, fetchMiningTree, fetchNews, fetchOwnership, fetchUniverse, hasSectorsKey } from "./sectorsApp";
 import type { CrossLink, DataSource, LinksPayload, MarketOverview, NewsItem, SectorSlug, Stock } from "./types";
 
 const now = () => new Date().toISOString();
@@ -125,6 +125,10 @@ export async function getLinks(): Promise<LinksPayload> {
       const scan = [...new Set([...graphIdx, ...top])];
       const reports = await Promise.allSettled(scan.map((s) => fetchOwnership(s)));
 
+      const addLink = (l: CrossLink) => {
+        if (!links.some((x) => x.id === l.id)) links.push(l);
+      };
+
       for (const r of reports) {
         if (r.status !== "fulfilled") continue;
         const o = r.value;
@@ -135,13 +139,56 @@ export async function getLinks(): Promise<LinksPayload> {
           const id = `${hit.symbol}>${o.symbol}`;
           if (links.some((l) => l.id === id)) continue;
           const stake = h.share !== null ? (h.share > 1 ? h.share / 100 : h.share) : null;
-          links.push({
+          addLink({
             id,
             from: hit.symbol,
             to: o.symbol,
             relation: stake !== null && stake >= 0.5 ? "pengendali" : "pemegang-saham",
             stake,
             basis: `${h.name} tercatat sebagai pemegang saham utama ${names[o.symbol] ?? o.symbol}`,
+            origin: "otomatis",
+          });
+        }
+      }
+
+      /*
+       * The mining extension is the only endpoint that returns a corporate structure rather than
+       * a shareholder list, so it catches parents held through an unlisted vehicle that the
+       * shareholder names above miss. Only energy / basic-materials emiten are worth the lookup.
+       */
+      const miners = overview.idx.filter(
+        (s) => scan.includes(s.symbol) && (s.sector === "energy" || s.sector === "basic-materials"),
+      );
+      const trees = await Promise.allSettled(
+        miners.map(async (s) => [s.symbol, await fetchMiningTree(s.symbol)] as const),
+      );
+
+      for (const t of trees) {
+        if (t.status !== "fulfilled" || !t.value[1]) continue;
+        const [symbol, tree] = t.value;
+        for (const p of tree.parents) {
+          // A parent is an edge only when it is itself listed on either board, or matches an SGX name.
+          const hit = p.symbol && names[p.symbol] ? p.symbol : (matchSgx(p.name, overview.sgx)?.symbol ?? null);
+          if (!hit || hit === symbol) continue;
+          addLink({
+            id: `${hit}>${symbol}`,
+            from: hit,
+            to: symbol,
+            relation: p.stake !== null && p.stake >= 0.5 ? "pengendali" : "pemegang-saham",
+            stake: p.stake,
+            basis: `${p.name} tercatat sebagai induk ${names[symbol] ?? symbol} di data kepemilikan tambang sectors.app`,
+            origin: "otomatis",
+          });
+        }
+        for (const sub of tree.subsidiaries) {
+          if (!sub.symbol || !names[sub.symbol] || sub.symbol === symbol) continue;
+          addLink({
+            id: `${symbol}>${sub.symbol}`,
+            from: symbol,
+            to: sub.symbol,
+            relation: "anak-usaha",
+            stake: sub.stake,
+            basis: `${sub.name} tercatat sebagai anak usaha ${names[symbol] ?? symbol} di data kepemilikan tambang sectors.app`,
             origin: "otomatis",
           });
         }
