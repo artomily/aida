@@ -110,7 +110,7 @@ export default function DetailView({
         aside={
           <MeterPanel
             title="Seberapa tidak biasa"
-            dot={col ?? "#a7b4c6"}
+            dot={col ?? "var(--slash)"}
             icon={<TargetIcon />}
             big={<span style={{ color: col }}>{fmtZ(sector.z)}</span>}
             sub={
@@ -226,10 +226,10 @@ export default function DetailView({
             role="img"
             aria-label={`Keterkaitan 60 hari, terakhir ${last.toFixed(2)}`}
           >
-            <line x1="0" y1="14" x2="300" y2="14" stroke="rgba(120,145,180,0.18)" strokeWidth="1" />
-            <line x1="0" y1="70" x2="300" y2="70" stroke="#a7b4c6" strokeWidth="1" strokeDasharray="2 4" />
-            <line x1="0" y1="126" x2="300" y2="126" stroke="rgba(120,145,180,0.18)" strokeWidth="1" />
-            <path d={areaPath} fill="rgba(58,106,168,0.12)" stroke="none" />
+            <line x1="0" y1="14" x2="300" y2="14" stroke="rgb(var(--line) / 0.18)" strokeWidth="1" />
+            <line x1="0" y1="70" x2="300" y2="70" stroke="var(--slash)" strokeWidth="1" strokeDasharray="2 4" />
+            <line x1="0" y1="126" x2="300" y2="126" stroke="rgb(var(--line) / 0.18)" strokeWidth="1" />
+            <path d={areaPath} fill="var(--area-pos)" stroke="none" />
             <path
               d={linePath}
               fill="none"
@@ -243,14 +243,14 @@ export default function DetailView({
               cy={chartY(last).toFixed(1)}
               r="4"
               fill={POS}
-              stroke="#fff"
+              stroke="var(--surface)"
               strokeWidth="2"
               vectorEffect="non-scaling-stroke"
             />
           </svg>
           <div
             className="tnum"
-            style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "#7c869d", marginTop: 8 }}
+            style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "var(--dim)", marginTop: 8 }}
           >
             <span>60 hari lalu</span>
             <span>Hari ini</span>

@@ -16,11 +16,11 @@ import {
   type Status,
 } from "../lib/model";
 
-const SURFACE = "#ffffff";
-const GRID = "rgba(120,145,180,0.18)";
-const BASELINE = "#a7b4c6";
-const MUTED = "#59627e";
-const DIM = "#7c869d";
+const SURFACE = "var(--surface)";
+const GRID = "rgb(var(--line) / 0.18)";
+const BASELINE = "var(--slash)";
+const MUTED = "var(--muted)";
+const DIM = "var(--dim)";
 const NORMAL_INK = NEUTRAL;
 
 const axisLabel = {
@@ -111,7 +111,7 @@ function ResidualColumns() {
                   x={x + barW / 2}
                   y={pos ? BASE - Math.abs(d.r) * scale - 7 : BASE + Math.abs(d.r) * scale + 14}
                   textAnchor="middle"
-                  style={{ ...axisLabel, fill: "#020c21", fontWeight: 560 }}
+                  style={{ ...axisLabel, fill: "var(--ink)", fontWeight: 560 }}
                 >
                   {fmt(d.r)}
                 </text>
@@ -208,7 +208,7 @@ function DispersionLine() {
         <line x1="0" y1={Y(1.0)} x2={W} y2={Y(1.0)} stroke={GRID} strokeWidth="1" />
         <line x1="0" y1={Y(0.5)} x2={W} y2={Y(0.5)} stroke={GRID} strokeWidth="1" />
         <line x1="0" y1={BOTTOM} x2={W} y2={BOTTOM} stroke={BASELINE} strokeWidth="1" />
-        <path d={area} fill="rgba(58,106,168,0.12)" stroke="none" />
+        <path d={area} fill="var(--area-pos)" stroke="none" />
         <path
           d={line}
           fill="none"
@@ -269,9 +269,9 @@ function StatusMix() {
   const counts = statusMix();
   const total = SECTORS.length;
   const order: { key: Status; color: string; note: string }[] = [
-    { key: "DIVERGENT", color: "#0f1b31", note: "skor ≥ 2,0" },
-    { key: "WATCH", color: "#5f88b4", note: "skor 1,0 – 2,0" },
-    { key: "NORMAL", color: "#dde4ee", note: "skor < 1,0" },
+    { key: "DIVERGENT", color: "var(--cta)", note: "skor ≥ 2,0" },
+    { key: "WATCH", color: "var(--track-fill)", note: "skor 1,0 – 2,0" },
+    { key: "NORMAL", color: "var(--status-normal)", note: "skor < 1,0" },
   ];
 
   return (
@@ -315,7 +315,7 @@ function StatusMix() {
               alignItems: "center",
               gap: 10,
               fontSize: 14,
-              borderBottom: "1px solid rgba(120,145,180,0.18)",
+              borderBottom: "1px solid rgb(var(--line) / 0.18)",
               padding: "10px 0",
             }}
           >
@@ -325,7 +325,7 @@ function StatusMix() {
                 height: 10,
                 borderRadius: "50%",
                 background: o.color,
-                boxShadow: "inset 0 0 0 1px rgba(120,145,180,0.3)",
+                boxShadow: "inset 0 0 0 1px rgb(var(--line) / 0.3)",
                 display: "inline-block",
                 flex: "none",
               }}

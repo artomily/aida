@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SECTOR_NAME } from "../../lib/markets/sectors";
 import type { DataSource, Exchange, NewsItem, SectorSlug } from "../../lib/markets/types";
-import { bare, timeAgo, usePolling } from "./useMarkets";
+import { POLL_MS, bare, timeAgo, usePolling } from "./useMarkets";
 
 type People = Record<string, { name: string; position: string }[]>;
 
@@ -81,7 +81,7 @@ export default function SectorNews({
 }) {
   const [ex, setEx] = useState<Exchange | "ALL">("ALL");
   const url = `/api/markets/news?sector=${sector}${symbols.length ? `&symbols=${symbols.join(",")}` : ""}`;
-  const { data, error, at } = usePolling<{ source: DataSource; news: NewsItem[] }>(url, 60_000);
+  const { data, error, at } = usePolling<{ source: DataSource; news: NewsItem[] }>(url, POLL_MS);
   const items = (data?.news ?? []).filter((n) => ex === "ALL" || n.exchange === ex).slice(0, 12);
 
   return (
@@ -93,7 +93,7 @@ export default function SectorNews({
           </h3>
           <p className="ds-note" style={{ margin: "4px 0 0" }}>
             <span className="mk-live" aria-hidden="true" />
-            {at ? `Diperbarui ${new Date(at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} · otomatis tiap menit` : "Memuat…"}
+            {at ? `Diperbarui ${new Date(at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })} · otomatis tiap jam` : "Memuat…"}
           </p>
         </div>
         <div className="mk-seg" role="group" aria-label="Filter bursa">

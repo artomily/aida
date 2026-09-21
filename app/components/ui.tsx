@@ -19,10 +19,10 @@ export function BrandMark() {
           <circle cx="20" cy="20" r="18.2" />
         </clipPath>
       </defs>
-      <circle cx="20" cy="20" r="18.4" stroke="#0d1b30" strokeWidth="1.1" />
+      <circle cx="20" cy="20" r="18.4" stroke="var(--ink)" strokeWidth="1.1" />
       <g
         clipPath={`url(#${clip})`}
-        stroke="#0d1b30"
+        stroke="var(--ink)"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -40,7 +40,7 @@ export function BrandMark() {
   );
 }
 
-const STROKE = { stroke: "#202940", strokeWidth: 1.7, fill: "none" } as const;
+const STROKE = { stroke: "var(--nav-ink)", strokeWidth: 1.7, fill: "none" } as const;
 
 export const HomeIcon = () => (
   <svg viewBox="0 0 20 21" aria-hidden="true">
@@ -69,32 +69,32 @@ export const BookIcon = () => (
 
 export const Chevron = () => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
-    <path d="m6.6 3.6 6 5.4-6 5.4" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="m6.6 3.6 6 5.4-6 5.4" stroke="var(--cta-ink)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 export const ShieldIcon = () => (
   <svg viewBox="0 0 30 39" fill="none" aria-hidden="true">
-    <path d="M15 1.2 1.6 6.6v13.1c0 6.6 5.1 12.6 13.4 17.9 8.3-5.3 13.4-11.3 13.4-17.9V6.6z" stroke="#101c33" strokeWidth="2" strokeLinejoin="round" />
-    <path d="M2.1 18.9c4.6-1.1 8.9-1.6 12.9-1.6s8.3.5 12.9 1.6" stroke="#101c33" strokeWidth="2" strokeLinecap="round" />
+    <path d="M15 1.2 1.6 6.6v13.1c0 6.6 5.1 12.6 13.4 17.9 8.3-5.3 13.4-11.3 13.4-17.9V6.6z" stroke="var(--ink)" strokeWidth="2" strokeLinejoin="round" />
+    <path d="M2.1 18.9c4.6-1.1 8.9-1.6 12.9-1.6s8.3.5 12.9 1.6" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
 /** A target — "how far from the aim". */
 export const TargetIcon = () => (
   <svg viewBox="0 0 28 28" fill="none" aria-hidden="true">
-    <circle cx="14" cy="14" r="12" stroke="#101c33" strokeWidth="2" />
-    <circle cx="14" cy="14" r="6.5" stroke="#101c33" strokeWidth="2" />
-    <circle cx="14" cy="14" r="1.8" fill="#101c33" />
+    <circle cx="14" cy="14" r="12" stroke="var(--ink)" strokeWidth="2" />
+    <circle cx="14" cy="14" r="6.5" stroke="var(--ink)" strokeWidth="2" />
+    <circle cx="14" cy="14" r="1.8" fill="var(--ink)" />
   </svg>
 );
 
 /** "i" — stands in for the hero's play button next to the explanatory tagline. */
 export const InfoIcon = () => (
   <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-    <circle cx="10" cy="10" r="8.6" stroke="#0b1526" strokeWidth="1.7" />
-    <path d="M10 9v5" stroke="#0b1526" strokeWidth="1.9" strokeLinecap="round" />
-    <circle cx="10" cy="6" r="1.2" fill="#0b1526" />
+    <circle cx="10" cy="10" r="8.6" stroke="var(--ink)" strokeWidth="1.7" />
+    <path d="M10 9v5" stroke="var(--ink)" strokeWidth="1.9" strokeLinecap="round" />
+    <circle cx="10" cy="6" r="1.2" fill="var(--ink)" />
   </svg>
 );
 
@@ -109,7 +109,7 @@ export const QuestionIcon = () => (
   <svg viewBox="0 0 20 20" aria-hidden="true">
     <circle cx="10" cy="10" r="8.6" {...STROKE} />
     <path d="M7.6 7.7a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6" {...STROKE} strokeLinecap="round" />
-    <circle cx="10" cy="14.6" r="1" fill="#202940" />
+    <circle cx="10" cy="14.6" r="1" fill="var(--nav-ink)" />
   </svg>
 );
 
@@ -371,7 +371,7 @@ export function StatRow({ items, small }: { items: StatItem[]; small?: boolean }
 }
 
 export function StatusBadge({ status, pos }: { status: Status; pos: boolean }) {
-  const color = status === "NORMAL" ? undefined : status === "WATCH" ? "#8a96ab" : pos ? POS : NEG;
+  const color = status === "NORMAL" ? undefined : status === "WATCH" ? "var(--status-watch)" : pos ? POS : NEG;
   return (
     <span className="ds-status" style={status === "DIVERGENT" ? { color } : undefined}>
       <i style={color ? { background: color } : undefined} />

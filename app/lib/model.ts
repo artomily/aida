@@ -1,7 +1,7 @@
-/** Mirrors --pos / --neg in globals.css — SVG charts need the literal value. */
-export const POS = "#3a6aa8";
-export const NEG = "#b24a33";
-export const NEUTRAL = "#a7b4c6";
+/** Theme-aware: resolved from the --pos / --neg tokens, so charts follow light / dark. */
+export const POS = "var(--pos)";
+export const NEG = "var(--neg)";
+export const NEUTRAL = "var(--slash)";
 
 export const DIVERGENT_THRESHOLD = 2.0;
 export const WATCH_THRESHOLD = 1.0;

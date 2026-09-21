@@ -6,7 +6,7 @@ import { RELATION_LABEL } from "../../lib/markets/links";
 import type { DataSource, LinksPayload, NewsItem, Stock } from "../../lib/markets/types";
 import { Glass, SectionHead } from "../ui";
 import { NewsList, boardMentions } from "./SectorNews";
-import { bare, fmtChange, usePolling } from "./useMarkets";
+import { POLL_MS, bare, fmtChange, usePolling } from "./useMarkets";
 
 const LEVEL: Record<AlertLevel, { label: string; hint: string }> = {
   aman: { label: "Aman", hint: "Tidak ada gerak besar atau berita risiko." },
@@ -25,7 +25,7 @@ export default function DominoPanel({ links, stocks }: { links: LinksPayload; st
   );
   const { data: newsData } = usePolling<{ source: DataSource; news: NewsItem[] }>(
     graphSymbols.length ? `/api/markets/news?symbols=${graphSymbols.join(",")}` : null,
-    120_000,
+    POLL_MS,
   );
   const news = newsData?.news ?? [];
   const newsFor = (symbol: string) => news.filter((n) => n.symbols.includes(symbol));

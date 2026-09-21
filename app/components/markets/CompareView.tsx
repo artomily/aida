@@ -7,13 +7,13 @@ import type { Exchange, LinksPayload, MarketOverview, SectorSlug, Stock } from "
 import { Arrow, Glass, Hero, MeterPanel, SectionHead, TargetIcon } from "../ui";
 import DominoPanel from "./DominoPanel";
 import SectorNews from "./SectorNews";
-import { EXCHANGE_LABEL, bare, fmtChange, fmtPrice, sectorStats, usePolling } from "./useMarkets";
+import { EXCHANGE_LABEL, POLL_MS, bare, fmtChange, fmtPrice, sectorStats, usePolling } from "./useMarkets";
 
 const tone = (v: number | null) => (v == null || Math.abs(v) < 0.0005 ? undefined : v > 0 ? POS : NEG);
 
 export default function CompareView() {
-  const overview = usePolling<MarketOverview>("/api/markets/overview", 5 * 60_000);
-  const links = usePolling<LinksPayload>("/api/markets/links", 30 * 60_000);
+  const overview = usePolling<MarketOverview>("/api/markets/overview", POLL_MS);
+  const links = usePolling<LinksPayload>("/api/markets/links", POLL_MS);
   const data = overview.data;
 
   const bySector = useMemo(() => {

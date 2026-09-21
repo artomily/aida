@@ -3,14 +3,21 @@
  * Docs: https://docs.sectors.app (v1 was discontinued 2026-05-11).
  *
  * Credit budget per refresh, at the cache windows below:
- *   universe  ≈ 5 pages IDX + 3 pages SGX @ limit 200  → ~8 credits / 15 min
- *   news      ≈ 2 pages each exchange @ limit 30       → ~4 credits / 2 min
- *   links     1 report section per IDX emiten + 90-day closes per linked symbol → daily
+ *   universe  ≈ 5 pages IDX + 3 pages SGX @ limit 200  → ~8 credits / hour
+ *   news      ≈ 2 pages each exchange @ limit 30       → ~4 credits / hour (+1 per symbol-filtered call)
+ *   links     3 report sections per IDX emiten (daily), 90-day closes (12 h), mining trees (weekly)
+ *
+ * Nothing refreshes faster than HOURLY: prices are end-of-day anyway, and every upstream call
+ * bills a credit. `revalidate` is stale-while-revalidate, so at most one refetch per window
+ * no matter how many readers poll the /api/markets routes.
  */
 import { toSectorSlug } from "./sectors";
 import type { Exchange, NewsItem, Sentiment, Stock } from "./types";
 
 const BASE = "https://api.sectors.app/v2";
+
+/** Shortest cache window for any sectors.app call, in seconds. */
+export const HOURLY = 3600;
 
 export const hasSectorsKey = () => Boolean(process.env.SECTORS_API_KEY);
 
@@ -102,7 +109,7 @@ export async function fetchUniverse(exchange: Exchange): Promise<Stock[]> {
     path,
     { where: exchange === "IDX" ? IDX_WHERE : SGX_WHERE, order_by: "-market_cap", include_query_values: "true" },
     200,
-    900,
+    HOURLY,
     exchange === "IDX" ? 6 : 4,
   );
   return rows.map((r) => toStock(r, exchange)).filter((s): s is Stock => s !== null);
@@ -161,7 +168,7 @@ export async function fetchNews(
     path,
     { symbols, start: opts.start, extension: exchange === "IDX" ? "idx" : undefined },
     30,
-    opts.revalidate ?? 120,
+    opts.revalidate ?? HOURLY,
     opts.pages ?? 2,
   );
   return rows.map((r, i) => toNews(r, exchange, i));

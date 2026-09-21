@@ -174,8 +174,8 @@ export default function MethodologyView({ onNavigate }: { onNavigate: (view: Vie
             className="tnum"
             style={{
               borderRadius: 18,
-              background: "rgba(255,255,255,0.6)",
-              boxShadow: "inset 0 0 0 1px rgba(120,145,180,0.2)",
+              background: "rgb(var(--glass) / 0.6)",
+              boxShadow: "inset 0 0 0 1px rgb(var(--line) / 0.2)",
               padding: "18px 18px",
               fontSize: 17,
               lineHeight: 1.9,
@@ -187,7 +187,7 @@ export default function MethodologyView({ onNavigate }: { onNavigate: (view: Vie
             <sub style={sub}>i,t</sub>
             <div
               style={{
-                borderTop: "1px solid rgba(120,145,180,0.2)",
+                borderTop: "1px solid rgb(var(--line) / 0.2)",
                 marginTop: 12,
                 paddingTop: 10,
                 fontSize: 14,

@@ -42,12 +42,12 @@ function Intraday({ report, up }: { report: CompanyReport; up: boolean }) {
         y1={Y(report.prevClose)}
         x2={W}
         y2={Y(report.prevClose)}
-        stroke="#a7b4c6"
+        stroke="var(--slash)"
         strokeWidth="1"
         strokeDasharray="3 4"
         vectorEffect="non-scaling-stroke"
       />
-      <path d={`${line} L${W} ${H} L0 ${H} Z`} fill={up ? "rgba(58,106,168,0.12)" : "rgba(178,74,51,0.10)"} />
+      <path d={`${line} L${W} ${H} L0 ${H} Z`} fill={up ? "var(--area-pos)" : "var(--area-neg)"} />
       <path
         d={line}
         fill="none"
@@ -62,7 +62,7 @@ function Intraday({ report, up }: { report: CompanyReport; up: boolean }) {
         cy={Y(pts[pts.length - 1])}
         r="4"
         fill={color}
-        stroke="#fff"
+        stroke="var(--surface)"
         strokeWidth="2"
         vectorEffect="non-scaling-stroke"
       />
@@ -129,7 +129,7 @@ export default function CompanyReportPanel({ report }: { report: CompanyReport }
           <Intraday report={report} up={up} />
           <div
             className="tnum"
-            style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "#7c869d", marginTop: 8 }}
+            style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, color: "var(--dim)", marginTop: 8 }}
           >
             <span>09:00</span>
             <span>┄ penutupan kemarin {formatIDR(report.prevClose)}</span>
@@ -140,13 +140,13 @@ export default function CompanyReportPanel({ report }: { report: CompanyReport }
             Catatan sesi
           </h3>
           {report.notes.map((n, i) => (
-            <div key={i} style={{ display: "flex", gap: 14, padding: "10px 0", borderBottom: "1px solid rgba(120,145,180,0.18)" }}>
+            <div key={i} style={{ display: "flex", gap: 14, padding: "10px 0", borderBottom: "1px solid rgb(var(--line) / 0.18)" }}>
               <span className="tnum" style={{ fontSize: 13, fontWeight: 560, color: col, paddingTop: 1 }}>
                 {n.time}
               </span>
               <div>
                 <div style={{ fontSize: 14.5, lineHeight: 1.45, color: "var(--ink-soft)" }}>{n.text}</div>
-                <div style={{ fontSize: 12, color: "#7c869d", marginTop: 3 }}>
+                <div style={{ fontSize: 12, color: "var(--dim)", marginTop: 3 }}>
                   {n.source.charAt(0) + n.source.slice(1).toLowerCase()}
                 </div>
               </div>

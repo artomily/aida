@@ -195,7 +195,7 @@ export default function Landing() {
               <div className="ds-tagrow">
                 <a className="ds-play" href="#contoh" aria-label="Lihat contoh hari ini">
                   <svg viewBox="0 0 13 14" aria-hidden="true" style={{ width: 13, height: 14 }}>
-                    <path d="M1.4 1.3 11.6 7 1.4 12.7z" fill="#0b1526" />
+                    <path d="M1.4 1.3 11.6 7 1.4 12.7z" fill="var(--ink)" />
                   </svg>
                 </a>
                 <p className="ds-tag">Pasar Asia bilang satu hal. IDX melakukan hal lain. Kami tunjukkan di mana.</p>

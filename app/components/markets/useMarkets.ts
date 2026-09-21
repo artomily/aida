@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import type { Exchange, Stock } from "../../lib/markets/types";
 
+/** Matches the server's hourly sectors.app cache — polling faster only re-reads the same payload. */
+export const POLL_MS = 60 * 60_000;
+
 /**
  * Fetch JSON and re-poll every `pollMs` while the tab is visible. Keeps the last good payload
  * on a failed refresh, so a blip never blanks a panel.
