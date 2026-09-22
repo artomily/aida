@@ -33,9 +33,15 @@ export function usePolling<T>(url: string | null, pollMs: number) {
           setState((s) => ({ ...s, error: e instanceof Error ? e.message : "Gagal memuat", url }));
       }
     };
-    load();
-    const id = setInterval(() => !document.hidden && load(), pollMs);
-    const onVis = () => !document.hidden && load();
+    let last = 0;
+    const tick = () => {
+      last = Date.now();
+      load();
+    };
+    tick();
+    const id = setInterval(() => !document.hidden && tick(), pollMs);
+    // Coming back to the tab only refreshes once the payload is actually due, not on every focus.
+    const onVis = () => !document.hidden && Date.now() - last >= pollMs && tick();
     document.addEventListener("visibilitychange", onVis);
     return () => {
       alive = false;

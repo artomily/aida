@@ -11,10 +11,12 @@
  * bills a credit. `revalidate` is stale-while-revalidate, so at most one refetch per window
  * no matter how many readers poll the /api/markets routes.
  */
+import { memo } from "./memo";
 import { toSectorSlug } from "./sectors";
 import type { Exchange, NewsItem, Sentiment, Stock } from "./types";
 
-const BASE = "https://api.sectors.app/v2";
+// Overridable so a local mock can stand in for the real API when measuring call volume.
+const BASE = process.env.SECTORS_API_BASE ?? "https://api.sectors.app/v2";
 
 /** Shortest cache window for any sectors.app call, in seconds. */
 export const HOURLY = 3600;
@@ -30,18 +32,44 @@ export class SectorsError extends Error {
   }
 }
 
+/*
+ * Hard ceiling on upstream calls per rolling hour. A runaway loop or a cache that stops working
+ * then costs at most this many credits before the app degrades to sample data, instead of 30k.
+ */
+const MAX_CALLS_PER_HOUR = Number(process.env.SECTORS_MAX_CALLS_PER_HOUR ?? 400);
+const gb = globalThis as typeof globalThis & { __sectorsCalls?: number[] };
+const calls = (gb.__sectorsCalls ??= []);
+
+function spend(path: string) {
+  const cutoff = Date.now() - 3_600_000;
+  while (calls.length && calls[0] < cutoff) calls.shift();
+  if (calls.length >= MAX_CALLS_PER_HOUR)
+    throw new SectorsError(429, `budget: ${MAX_CALLS_PER_HOUR} sectors.app calls/hour reached, skipped ${path}`);
+  calls.push(Date.now());
+}
+
+/** Upstream calls made in the last hour — surfaced in /api/markets/usage. */
+export function usage() {
+  const cutoff = Date.now() - 3_600_000;
+  return { lastHour: calls.filter((t) => t >= cutoff).length, maxPerHour: MAX_CALLS_PER_HOUR };
+}
+
 async function get<T>(path: string, params: Record<string, string | number | undefined>, revalidate: number): Promise<T> {
   const url = new URL(BASE + path);
   for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== "") url.searchParams.set(k, String(v));
-  const res = await fetch(url, {
-    headers: { Authorization: process.env.SECTORS_API_KEY ?? "" },
-    next: { revalidate, tags: ["sectors"] },
+  // The in-process memo is the real guard; Next's fetch cache stays underneath to survive restarts.
+  return memo(url.toString(), revalidate * 1000, async () => {
+    spend(path);
+    const res = await fetch(url, {
+      headers: { Authorization: process.env.SECTORS_API_KEY ?? "" },
+      next: { revalidate, tags: ["sectors"] },
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new SectorsError(res.status, `sectors.app ${res.status} ${path}: ${body.slice(0, 200)}`);
+    }
+    return res.json() as Promise<T>;
   });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new SectorsError(res.status, `sectors.app ${res.status} ${path}: ${body.slice(0, 200)}`);
-  }
-  return res.json() as Promise<T>;
 }
 
 type Page<T> = {
