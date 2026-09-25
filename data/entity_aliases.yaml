@@ -1,0 +1,36 @@
+# Name variants → ticker. Used by the Trigger component to resolve mentions in news text and
+# by the ownership cross-check to recognise SGX entities in IDX `holder_name` values.
+# Matching is case-insensitive on whole words; keep aliases specific enough that they do not
+# collide with ordinary words (no bare "Golden" or "First").
+
+C07.SI: [Jardine Cycle & Carriage, Jardine Cycle and Carriage, JC&C]
+J36.SI: [Jardine Matheson]
+O39.SI: [OCBC, Oversea-Chinese Banking]
+Z74.SI: [Singtel, Singapore Telecommunications]
+E5H.SI: [Golden Agri-Resources, Golden Agri Resources, Golden Agri, GAR]
+5JS.SI: [Indofood Agri Resources, IndoAgri]
+EB5.SI: [First Resources]
+P8Z.SI: [Bumitama Agri, Bumitama]
+P34.SI: [Delfi]
+F34.SI: [Wilmar]
+RE4.SI: [Geo Energy Resources, Geo Energy]
+A26.SI: [Sinarmas Land, Sinar Mas Land]
+D5IU.SI: [Lippo Malls Indonesia Retail Trust, LMIR Trust, LMIRT]
+LJ3.SI: [OUE Limited, OUE Ltd]
+AW9U.SI: [First Real Estate Investment Trust, First REIT]
+S56.SI: [Samudera Shipping Line, Samudera Shipping]
+
+ASII.JK: [Astra International]
+UNTR.JK: [United Tractors]
+AALI.JK: [Astra Agro Lestari]
+NISP.JK: [Bank OCBC NISP, OCBC NISP]
+TLKM.JK: [Telkom Indonesia, Telkomsel]
+SMAR.JK: [SMART Tbk, Sinar Mas Agro Resources]
+INDF.JK: [Indofood Sukses Makmur]
+SIMP.JK: [Salim Ivomas Pratama, Salim Ivomas]
+LSIP.JK: [London Sumatra, Lonsum]
+BSDE.JK: [Bumi Serpong Damai, BSD City]
+DUTI.JK: [Duta Pertiwi]
+LPKR.JK: [Lippo Karawaci]
+SILO.JK: [Siloam International Hospitals, Siloam Hospitals, Siloam]
+SMDR.JK: [Samudera Indonesia]

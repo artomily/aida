@@ -6,21 +6,39 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "tsx --test scoring/*.test.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx --env-file-if-exists=.env db/migrate.ts",
+    "ingest:backfill": "tsx --env-file-if-exists=.env jobs/run.ts backfill",
+    "job:daily": "tsx --env-file-if-exists=.env jobs/run.ts daily",
+    "job:weekly": "tsx --env-file-if-exists=.env jobs/run.ts weekly",
+    "research:leadlag": "tsx --env-file-if-exists=.env research/01_leadlag_validation.ts",
+    "mock:sectors": "node scripts/sectors-mock.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "@neon/config": "^1.7.3",
+    "@neon/env": "^1.4.4",
+    "@neondatabase/serverless": "^1.1.0",
+    "drizzle-orm": "^0.45.3",
     "next": "16.3.5",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

@@ -6,7 +6,10 @@
  */
 import Link from "next/link";
 import { useId, type CSSProperties, type MouseEvent, type ReactNode } from "react";
-import { NEG, POS, type Status, STATUS_LABEL } from "../lib/model";
+
+/** Theme-aware polarity colours, resolved from the --pos / --neg tokens. */
+export const POS = "var(--pos)";
+export const NEG = "var(--neg)";
 
 /* ── icons ── */
 
@@ -367,16 +370,6 @@ export function StatRow({ items, small }: { items: StatItem[]; small?: boolean }
         </div>
       ))}
     </div>
-  );
-}
-
-export function StatusBadge({ status, pos }: { status: Status; pos: boolean }) {
-  const color = status === "NORMAL" ? undefined : status === "WATCH" ? "var(--status-watch)" : pos ? POS : NEG;
-  return (
-    <span className="ds-status" style={status === "DIVERGENT" ? { color } : undefined}>
-      <i style={color ? { background: color } : undefined} />
-      {STATUS_LABEL[status]}
-    </span>
   );
 }
 

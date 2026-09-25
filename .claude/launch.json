@@ -11,13 +11,12 @@
       "port": 3000
     },
     {
-      "name": "divergence-mock",
-      "runtimeExecutable": "sh",
+      "name": "sectors-mock",
+      "runtimeExecutable": "node",
       "runtimeArgs": [
-        "-c",
-        "cd /private/tmp/claude-501/-Users-user-Code-divergence/6ed92787-c55e-4404-9c84-050ceed9b0ff/scratchpad/mockcopy && SECTORS_API_BASE=http://127.0.0.1:4010/v2 SECTORS_API_KEY=mock npx next dev -p 3100"
+        "scripts/sectors-mock.mjs"
       ],
-      "port": 3100
+      "port": 4010
     }
   ]
 }

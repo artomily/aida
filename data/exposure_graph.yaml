@@ -1,0 +1,176 @@
+# Curated SGX <-> IDX relationships — the Exposure (Base) component reads only this file.
+#
+# Every row links one SGX-listed entity to the IDX sector it structurally touches, and to a
+# specific IDX emiten when there is one. Stakes are approximate and drift with every placement
+# or buyback: they document *why* a row exists, they are not used in the score. Rows marked
+# `verified: false` still need a check against the latest annual report / keterbukaan
+# informasi; the daily job also cross-checks `holder_name` in IDX ownership filings against
+# `data/entity_aliases.yaml` and reports matches on the methodology page.
+#
+# relation → weight (see README, "Exposure"):
+#   parent                    1.0  SGX entity controls the IDX emiten (or the reverse)
+#   significant_shareholder   0.7  non-controlling but material stake, incl. indirect control
+#   sgx_listed_id_operations  0.6  SGX-listed, primary operations in Indonesia
+#   commodity_trade           0.4  shared commodity / trade channel
+#   board_overlap             0.2  same group or shared directors only
+
+relation_weights:
+  parent: 1.0
+  significant_shareholder: 0.7
+  sgx_listed_id_operations: 0.6
+  commodity_trade: 0.4
+  board_overlap: 0.2
+
+# Approximate rate, used only to set an SGX-only company's market cap (SGD) against its IDX
+# sector's (IDR). A 5% error here moves those rows' contribution by 5%, nothing else.
+fx:
+  sgd_idr: 12500
+
+relationships:
+  # ── industrials: Jardine → Astra ──
+  - sgx_entity: C07.SI
+    idx_symbol: ASII.JK
+    sector: industrials
+    relation: parent
+    stake: 0.5
+    source: Jardine Cycle & Carriage holds ~50% of Astra International
+    verified: false
+  - sgx_entity: J36.SI
+    idx_symbol: ASII.JK
+    sector: industrials
+    relation: significant_shareholder
+    via: C07.SI
+    source: Jardine Matheson controls JC&C, which controls Astra
+    verified: false
+  - sgx_entity: C07.SI
+    idx_symbol: UNTR.JK
+    sector: industrials
+    relation: significant_shareholder
+    via: ASII.JK
+    stake: 0.3
+    source: Astra holds ~60% of United Tractors (indirect ~30% for JC&C)
+    verified: false
+  - sgx_entity: C07.SI
+    idx_symbol: AALI.JK
+    sector: consumer-non-cyclicals
+    relation: significant_shareholder
+    via: ASII.JK
+    stake: 0.4
+    source: Astra holds ~80% of Astra Agro Lestari (indirect ~40% for JC&C)
+    verified: false
+
+  # ── financials ──
+  - sgx_entity: O39.SI
+    idx_symbol: NISP.JK
+    sector: financials
+    relation: parent
+    stake: 0.85
+    source: OCBC holds ~85% of Bank OCBC NISP
+    verified: false
+
+  # ── infrastructure ──
+  - sgx_entity: Z74.SI
+    idx_symbol: TLKM.JK
+    sector: infrastructure
+    relation: significant_shareholder
+    source: Singtel owns 35% of Telkomsel, Telkom Indonesia's main subsidiary
+    verified: false
+
+  # ── consumer non-cyclicals: plantations & food ──
+  - sgx_entity: E5H.SI
+    idx_symbol: SMAR.JK
+    sector: consumer-non-cyclicals
+    relation: parent
+    stake: 0.95
+    source: Golden Agri-Resources (Sinar Mas) controls SMART Tbk
+    verified: false
+  - sgx_entity: 5JS.SI
+    idx_symbol: INDF.JK
+    sector: consumer-non-cyclicals
+    relation: parent
+    stake: 0.74
+    source: Indofood holds ~74% of Indofood Agri Resources (IDX → SGX control)
+    verified: false
+  - sgx_entity: 5JS.SI
+    idx_symbol: SIMP.JK
+    sector: consumer-non-cyclicals
+    relation: parent
+    stake: 0.72
+    source: IndoAgri holds ~72% of Salim Ivomas Pratama
+    verified: false
+  - sgx_entity: 5JS.SI
+    idx_symbol: LSIP.JK
+    sector: consumer-non-cyclicals
+    relation: significant_shareholder
+    via: SIMP.JK
+    source: Salim Ivomas holds ~60% of PP London Sumatra
+    verified: false
+  - sgx_entity: EB5.SI
+    sector: consumer-non-cyclicals
+    relation: sgx_listed_id_operations
+    source: First Resources — oil palm plantations in Riau and Kalimantan
+    verified: false
+  - sgx_entity: P8Z.SI
+    sector: consumer-non-cyclicals
+    relation: sgx_listed_id_operations
+    source: Bumitama Agri — oil palm plantations in Kalimantan
+    verified: false
+  - sgx_entity: P34.SI
+    sector: consumer-non-cyclicals
+    relation: sgx_listed_id_operations
+    source: Delfi — chocolate confectionery, Indonesia is its largest market
+    verified: false
+  - sgx_entity: F34.SI
+    sector: consumer-non-cyclicals
+    relation: commodity_trade
+    source: Wilmar — palm oil processing and trading with large Indonesian operations
+    verified: false
+
+  # ── energy ──
+  - sgx_entity: RE4.SI
+    sector: energy
+    relation: sgx_listed_id_operations
+    source: Geo Energy Resources — coal mining in Kalimantan
+    verified: false
+
+  # ── properties ──
+  - sgx_entity: A26.SI
+    idx_symbol: BSDE.JK
+    sector: properties
+    relation: parent
+    source: Sinarmas Land controls Bumi Serpong Damai
+    verified: false
+  - sgx_entity: A26.SI
+    idx_symbol: DUTI.JK
+    sector: properties
+    relation: parent
+    source: Sinarmas Land controls Duta Pertiwi
+    verified: false
+  - sgx_entity: D5IU.SI
+    idx_symbol: LPKR.JK
+    sector: properties
+    relation: sgx_listed_id_operations
+    source: Lippo Malls Indonesia Retail Trust — Indonesian malls, sponsored by Lippo Karawaci
+    verified: false
+  - sgx_entity: LJ3.SI
+    idx_symbol: LPKR.JK
+    sector: properties
+    relation: board_overlap
+    source: OUE and Lippo Karawaci are both part of the Lippo group
+    verified: false
+
+  # ── healthcare ──
+  - sgx_entity: AW9U.SI
+    idx_symbol: SILO.JK
+    sector: healthcare
+    relation: sgx_listed_id_operations
+    source: First REIT — owns hospital real estate leased to Siloam Hospitals
+    verified: false
+
+  # ── transportation ──
+  - sgx_entity: S56.SI
+    idx_symbol: SMDR.JK
+    sector: transportation
+    relation: parent
+    source: Samudera Indonesia controls Samudera Shipping Line (IDX → SGX control)
+    verified: false

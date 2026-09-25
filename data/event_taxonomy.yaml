@@ -1,0 +1,87 @@
+# Rule-based event taxonomy for the Trigger component. No model in the scoring path: every
+# score traces back to one pattern below, which is what makes it deterministic, free to
+# backtest across the whole news archive, and auditable line by line.
+#
+# direction   +1 supportive, -1 adverse, 0 ambiguous (still counts toward attention)
+# materiality 0–1, how much an event of this kind usually matters to a linked IDX sector
+# patterns    case-insensitive regular expressions, matched against headline and body
+#
+# A headline match weighs `headline_weight` × a body match. A match is dropped when any of
+# the `negation_window` tokens before it is a negation word ("denies profit warning").
+
+negation_window: 5
+headline_weight: 2
+negations: [not, no, never, denies, denied, deny, rules out, ruled out, without, tidak, bukan, belum, batal, membantah, tanpa]
+
+events:
+  profit_warning:
+    direction: -1
+    materiality: 1.0
+    patterns:
+      - profit warning
+      - (expects?|expected|flags?|warns? of) (a )?(net )?loss
+      - (profit|earnings|net income) (to )?(fall|drop|decline|plunge|slump)s?
+      - loss (widens|widened)
+      - impairment
+      - (laba|keuntungan) (turun|anjlok|merosot)
+      - rugi bersih
+
+  divestment:
+    direction: -1
+    materiality: 0.8
+    patterns:
+      - divest(s|ed|ment|ing)?
+      - (sells?|sold|disposes?|disposed|disposal of) (its |a |the )?(stake|shares|interest|subsidiary|unit)
+      - (pares|cuts|reduces) (its |a )?stake
+      - (melepas|menjual|divestasi) (saham|kepemilikan)
+
+  acquisition:
+    direction: 1
+    materiality: 0.8
+    patterns:
+      - acquir(e|es|ed|ing|ition)
+      - takeover
+      - (buys?|bought) (a |an |its |the )?(stake|shares|controlling)
+      - (raises|increases|ups) (its |a )?stake
+      - tender offer
+      - privati[sz](e|es|ed|ation)
+      - (akuisisi|mengakuisisi|tender offer|penawaran tender)
+
+  regulatory:
+    direction: -1
+    materiality: 0.7
+    patterns:
+      - (probe|investigation|investigated|inquiry)
+      - (fined|penalty|penalised|penalized|sanction(s|ed)?)
+      - (suspend(s|ed)?|suspension|trading halt|halts? trading)
+      - (lawsuit|sued|litigation|legal action)
+      - (license|licence|permit) (revoked|suspended|cancelled|canceled)
+      - (default(s|ed)?|restructur(e|ing)|debt moratorium|pkpu|pailit|gagal bayar)
+      - (penyelidikan|penyidikan|suspensi|gugatan|sanksi|denda)
+
+  export_policy:
+    direction: 0
+    materiality: 0.9
+    patterns:
+      - export (ban|levy|levies|duty|duties|quota|tax|restriction)s?
+      - (domestic market obligation|dmo)
+      - (b40|b50|biodiesel mandate)
+      - (royalt(y|ies)) (hike|increase|change)
+      - (larangan|pungutan|bea) ekspor
+      - (kewajiban pasok dalam negeri)
+
+  capital_raise:
+    direction: 0
+    materiality: 0.5
+    patterns:
+      - (rights issue|placement|share placement|new shares|capital raising)
+      - (bond|notes|sukuk) (issue|issuance|offering)
+      - (right issue|penambahan modal|hmetd|penerbitan obligasi)
+
+  dividend:
+    direction: 1
+    materiality: 0.3
+    patterns:
+      - (special|interim|final) dividend
+      - dividend (hike|increase|raised)
+      - (dividen) (naik|meningkat|interim|final)
