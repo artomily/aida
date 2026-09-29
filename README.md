@@ -1,4 +1,4 @@
-# Divergence
+# Aida
 
 **Sector attention scoring for IDX, driven by Singapore market linkage.**
 

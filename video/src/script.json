@@ -1,0 +1,68 @@
+{
+  "fps": 30,
+  "voice": "Damayanti",
+  "rate": 182,
+  "scenes": [
+    {
+      "id": "hook",
+      "minFrames": 150,
+      "lines": [
+        { "text": "Setiap pagi, bursa Singapura buka satu jam lebih dulu dari Jakarta." }
+      ]
+    },
+    {
+      "id": "problem",
+      "minFrames": 135,
+      "lines": [
+        { "text": "Tapi kabar SGX sering baru terasa di IDX, berjam-jam kemudian." }
+      ]
+    },
+    {
+      "id": "linkage",
+      "minFrames": 240,
+      "lines": [
+        { "text": "Padahal, lebih dari dua puluh emiten SGX beroperasi di Indonesia.", "speak": "Padahal, lebih dari dua puluh emiten, es ge eks, beroperasi di Indonesia." },
+        { "text": "Dan banyak blue chip kita dimiliki entitas Singapura.", "speak": "Dan banyak saham blu cip kita, dimiliki entitas Singapura." }
+      ]
+    },
+    {
+      "id": "brand",
+      "minFrames": 105,
+      "lines": [
+        { "text": "Kenalkan, Aida.", "speak": "Kenalkan. Aida.", "delay": 20 }
+      ]
+    },
+    {
+      "id": "formula",
+      "minFrames": 240,
+      "lines": [
+        { "text": "Empat komponen. Dikalikan, bukan dijumlah." },
+        { "text": "Eksposur.", "delay": 4 },
+        { "text": "Sensitivitas.", "delay": 4 },
+        { "text": "Flow.", "speak": "Flo.", "delay": 4 },
+        { "text": "Dan pemicu berita.", "delay": 4 }
+      ]
+    },
+    {
+      "id": "board",
+      "minFrames": 180,
+      "lines": [
+        { "text": "Setiap pagi sebelum jam enam, sebelas sektor IDX diurutkan menurut skor perhatian." }
+      ]
+    },
+    {
+      "id": "honest",
+      "minFrames": 165,
+      "lines": [
+        { "text": "Tanpa asumsi. Tiap hubungan diuji per sektor, dan dilaporkan apa adanya." }
+      ]
+    },
+    {
+      "id": "outro",
+      "minFrames": 165,
+      "lines": [
+        { "text": "Aida. Tahu sektor mana yang layak dicek, sebelum pasar buka.", "speak": "Aida. Tahu sektor mana yang layak dicek, sebelum pasar buka." }
+      ]
+    }
+  ]
+}
