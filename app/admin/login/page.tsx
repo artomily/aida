@@ -8,7 +8,6 @@ export const metadata: Metadata = { title: "Admin — Aida", robots: { index: fa
 export default function AdminLogin() {
   return (
     <>
-      <div className="ds-plate" aria-hidden="true" />
       <div className="ds-shell">
         <main className="dv-login">
           <Glass delay={0}>

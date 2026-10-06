@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import ThemeToggle from "./ThemeToggle";
 import { BrandMark, Cta } from "./ui";
 
 export type NavItem = {
@@ -112,7 +111,6 @@ export default function Header({
         </nav>
 
         <div className="ds-header-end">
-          <ThemeToggle />
           <Cta href={cta.href} onClick={cta.onClick ? () => run(cta.onClick) : () => setOpen(false)} passthrough={!cta.onClick}>
             {cta.label}
           </Cta>

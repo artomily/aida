@@ -1,115 +1,68 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — shared with the landing hero in public/index.html.
- * Light studio frame, deep navy ink, frosted-glass surfaces, one steel-blue accent.
+ * Design tokens — shared with the landing page (app/page.tsx, app/landing.css).
+ * Dark only: black frame over the cinematic loop, near-white ink, dark teal/charcoal glass
+ * with hairline white borders, white 7px-radius actions.
  */
 :root {
-  --ink: #020c21;
-  --ink-soft: #0f182f;
-  --muted: #59627e;
-  --muted2: #4d5b77;
-  --label: #39455f;
-  --nav-ink: #202940;
-  --frame: #e6edf6;
-  --cta: #0f1b31;
-  --cta-knob: #384b64;
-  --meet-knob: #1a2b45;
-  --accent: #4a78b0;
-  --track: #dde4ee;
-  --track-fill: #5f88b4;
-  --hair: #ced5e0;
-  --slash: #a7b4c6;
+  --ink: #ffffff;
+  --ink-soft: #e2e5e4;
+  --muted: #9ba1a2;
+  --muted2: #b4b9b9;
+  --label: #c6caca;
+  --nav-ink: #d4d5d6;
+  --frame: #0c1012;
+  --cta: #ffffff;
+  --cta-ink: #101010;
+  --cta-knob: #070909;
+  --meet-knob: #070909;
+  --accent: #9fcbd4;
+  --track: #1a2325;
+  --track-fill: #cfe2e5;
+  --hair: #2c3436;
+  --slash: #4b5557;
 
   /* Residual polarity — blue above the model, terracotta below. Always paired with ▲/▼. */
-  --pos: #3a6aa8;
-  --neg: #b24a33;
+  --pos: #7fb2e2;
+  --neg: #e48466;
 
-  --plate: url("https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_105822_bf7c2d53-9957-4521-bbbf-7c1ab7a70130.png");
+  /* The demo card's red/blue smoke, drawn rather than shipped as an image. */
+  --plate:
+    radial-gradient(ellipse 55% 60% at 30% 42%, rgba(214, 52, 44, 0.95), transparent 70%),
+    radial-gradient(ellipse 60% 55% at 72% 60%, rgba(38, 92, 196, 0.95), transparent 72%),
+    radial-gradient(ellipse 40% 30% at 52% 50%, rgba(240, 220, 230, 0.55), transparent 70%),
+    #0b1418;
 
-  --ease-glass: cubic-bezier(0.2, 0.75, 0.28, 1);
-  --ease-soft: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --ease-glass: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
   --background: var(--frame);
   --foreground: var(--ink);
 
   /* Surface families — alpha is applied at the use site: rgb(var(--glass) / 0.6). */
-  --glass: 255 255 255;
-  --shade: 28 52 92;
-  --line: 120 145 180;
-  --veil: 230 237 246;
-  --surface: #fff;
-  --cta-ink: #fff;
-  --dim: #7c869d;
-  --focus: #2f5f9e;
-  --area-pos: rgba(58, 106, 168, 0.12);
-  --area-neg: rgba(178, 74, 51, 0.1);
-  --alert-tint: rgba(255, 246, 243, 0.8);
-  --bad-bg: #fde8e6;
-  --bad-ink: #9b2f22;
-  --info-bg: #e3ecf8;
-  --info-ink: #264f86;
-  --warn-bg: #fff4e0;
-  --warn-ink: #8a5a00;
-  --ok-bg: #e6f4ec;
-  --ok-ink: #1f6b43;
-  --status-normal: #dde4ee;
-  --status-watch: #8a96ab;
-  color-scheme: light;
-}
-
-/*
- * Dark: same navy family inverted — deep navy frame, pale ink, smoked-glass surfaces.
- * The head script in layout.tsx always resolves a theme (stored choice, else the OS
- * preference), so one selector covers both.
- */
-:root[data-theme="dark"] {
-  --ink: #e6ecf5;
-  --ink-soft: #cfd8e6;
-  --muted: #9aa6bd;
-  --muted2: #a3aec3;
-  --label: #b4bfd2;
-  --nav-ink: #d9e1ee;
-  --frame: #0a1424;
-  --cta: #dfe7f2;
-  --cta-ink: #0a1424;
-  --cta-knob: #b7c6da;
-  --meet-knob: #c7d4e6;
-  --accent: #7ea4d6;
-  --track: #1d2b42;
-  --track-fill: #6f97c6;
-  --hair: #2a3a55;
-  --slash: #52627e;
-  --pos: #74a1dc;
-  --neg: #e0795f;
-
-  --glass: 22 34 56;
+  --glass: 30 40 43;
   --shade: 0 0 0;
-  --line: 120 145 185;
-  --veil: 10 20 36;
-  --surface: #13203a;
-  --dim: #8591a8;
-  --focus: #8fb4e6;
-  --area-pos: rgba(116, 161, 220, 0.16);
-  --area-neg: rgba(224, 121, 95, 0.14);
-  --alert-tint: rgba(224, 121, 95, 0.1);
+  --line: 255 255 255;
+  --veil: 0 0 0;
+  --surface: #222c2f;
+  --dim: #7d8587;
+  --focus: #ffffff;
+  --area-pos: rgba(127, 178, 226, 0.16);
+  --area-neg: rgba(228, 132, 102, 0.14);
+  --alert-tint: rgba(228, 132, 102, 0.1);
   --bad-bg: #3a1d1a;
   --bad-ink: #f0a494;
-  --info-bg: #1a2b45;
-  --info-ink: #a9c6ee;
+  --info-bg: #17282d;
+  --info-ink: #a9d2dc;
   --warn-bg: #3a2c10;
   --warn-ink: #e8c46e;
   --ok-bg: #143224;
   --ok-ink: #8fd6ae;
-  --status-normal: #2a3a55;
-  --status-watch: #7f8ca3;
+  --status-normal: #2c3436;
+  --status-watch: #7f8a8c;
   color-scheme: dark;
 }
-/* The hero plate is a light studio photo — dim it rather than let it glare through. */
-:root[data-theme="dark"] .ds-plate {
-  filter: saturate(0.8) brightness(0.32) contrast(1.1);
-}
-
 
 @theme inline {
   --color-background: var(--background);
@@ -119,7 +72,7 @@
 body {
   background: var(--frame);
   color: var(--ink);
-  font-family: var(--font-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Reference Sans", var(--font-sans), Arial, sans-serif;
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: geometricPrecision;
@@ -129,21 +82,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── background plate: the hero's glass sphere, veiled so data stays legible ── */
-.ds-plate {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background: var(--plate) 62% 40% / cover no-repeat, var(--frame);
-  filter: saturate(0.965);
-  pointer-events: none;
-}
-.ds-plate::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgb(var(--veil) / 0.1) 0%, rgb(var(--veil) / 0.55) 55%, rgb(var(--veil) / 0.82) 100%);
-}
+/* ── background: flat, so data reads cleanly (the video loop is landing-only) ── */
 .ds-shell {
   position: relative;
   z-index: 1;
@@ -156,106 +95,95 @@ body {
 /* ── glass surfaces ── */
 .ds-glass {
   position: relative;
-  border-radius: 28px;
-  background: linear-gradient(135deg, rgb(var(--glass) / 0.62), rgb(var(--glass) / 0.34));
-  border: 1px solid rgb(var(--glass) / 0.6);
-  -webkit-backdrop-filter: blur(40px) saturate(112%);
-  backdrop-filter: blur(40px) saturate(112%);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(24, 22, 20, 0.74), rgba(5, 12, 14, 0.82));
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  -webkit-backdrop-filter: blur(14px) saturate(108%);
+  backdrop-filter: blur(14px) saturate(108%);
   box-shadow:
-    inset 1px 1px 0 rgb(var(--glass) / 0.55),
-    inset -1px -1px 0 rgb(var(--glass) / 0.18),
-    0 18px 40px rgb(var(--shade) / 0.07);
+    0 2px 10px rgba(0, 0, 0, 0.44),
+    0 0 0 3px rgba(255, 255, 255, 0.035) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.9);
   padding: 26px 28px;
   min-width: 0;
 }
 .ds-pill {
-  border-radius: 999px;
-  background: rgb(var(--glass) / 0.78);
-  border: 1px solid rgb(var(--glass) / 0.85);
-  -webkit-backdrop-filter: blur(40px);
-  backdrop-filter: blur(40px);
-  box-shadow:
-    0 0 0 1.3px rgb(var(--line) / 0.2),
-    0 2px 10px rgb(var(--shade) / 0.05);
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(26, 34, 36, 0.86), rgba(16, 29, 33, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.21);
+  -webkit-backdrop-filter: blur(14px) saturate(108%);
+  backdrop-filter: blur(14px) saturate(108%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
 }
 
-/* ── header ── */
-/* 1fr · auto · 1fr keeps the nav pill optically centred without ever overlapping its neighbours */
+/* ── header: brand · text nav with underline · white action ── */
 .ds-header {
   position: relative;
   z-index: 10;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 40px;
-}
-.ds-header-end {
-  justify-self: end;
+  margin-bottom: 48px;
 }
 .ds-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: inherit;
   text-decoration: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 .ds-brand svg {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   flex: none;
 }
 .ds-brand b {
-  font-size: 21px;
-  font-weight: 520;
-  letter-spacing: -0.03em;
+  font-size: 18px;
+  font-weight: 480;
+  letter-spacing: -0.36px;
   line-height: 1;
 }
 .ds-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
-  height: 60px;
-  padding: 0 8px;
+  gap: clamp(28px, 2.9vw, 43px);
 }
 .ds-nav a {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 9px;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 999px;
-  color: var(--nav-ink);
+  padding: 8px 0;
+  color: rgba(229, 229, 230, 0.77);
   text-decoration: none;
-  font-size: 15px;
-  font-weight: 570;
-  letter-spacing: -0.03em;
+  font-size: 16px;
+  font-weight: 430;
+  letter-spacing: -0.36px;
   white-space: nowrap;
-  transition: background 0.25s var(--ease-soft), box-shadow 0.25s var(--ease-soft);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
-.ds-nav a:hover {
-  background: rgb(var(--glass) / 0.7);
-}
+.ds-nav a:hover,
 .ds-nav a[aria-current="page"] {
-  background: var(--surface);
-  box-shadow: 0 2px 8px rgb(var(--shade) / 0.08);
+  color: #fff;
 }
-.ds-nav svg {
-  width: 19px;
-  height: 19px;
-  flex: none;
+.ds-nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 44px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.82);
 }
+.ds-nav svg,
 .ds-nav hr {
-  width: 1.5px;
-  height: 26px;
-  background: var(--hair);
-  border: 0;
-  margin: 0 4px;
+  display: none;
 }
 .ds-header-end {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-left: auto;
 }
 .ds-chip {
   display: inline-flex;
@@ -264,7 +192,7 @@ body {
   height: 44px;
   padding: 0 16px;
   font-size: 13.5px;
-  font-weight: 470;
+  font-weight: 440;
   color: var(--muted2);
   white-space: nowrap;
 }
@@ -273,7 +201,7 @@ body {
   height: 8px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 4px rgba(74, 120, 176, 0.18);
+  box-shadow: 0 0 0 4px rgba(159, 203, 212, 0.16);
 }
 .ds-burger {
   display: none;
@@ -281,17 +209,18 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
+  margin-left: auto;
   padding: 0;
   cursor: pointer;
 }
 .ds-burger i {
   display: block;
-  width: 20px;
+  width: 18px;
   height: 1.8px;
   border-radius: 999px;
-  background: var(--nav-ink);
+  background: #fff;
   transition: transform 0.3s var(--ease-soft);
 }
 .ds-burger[aria-expanded="true"] i:first-child {
@@ -301,91 +230,92 @@ body {
   transform: translateY(-3.9px) rotate(-45deg);
 }
 
-/* ── CTA pill with knob ── */
+/* ── white action: label + dark arrow box ── */
 .ds-cta {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 18px;
-  height: 60px;
-  padding: 0 7px 0 26px;
-  border-radius: 999px;
+  gap: 16px;
+  height: 44px;
+  padding: 0 5px 0 16px;
+  border-radius: 7px;
   border: 0;
   background: var(--cta);
   color: var(--cta-ink);
   font: inherit;
   font-size: 16px;
-  font-weight: 400;
-  letter-spacing: -0.03em;
+  font-weight: 450;
+  letter-spacing: -0.3px;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(11, 26, 50, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 1px 5px rgba(0, 0, 0, 0.38);
 }
 .ds-knob {
   display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
+  width: 34px;
+  height: 32px;
+  border-radius: 7px;
   background: var(--cta-knob);
 }
 .ds-knob svg {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
 }
 .ds-cta--glass {
-  background: rgb(var(--glass) / 0.4);
-  border: 1px solid rgb(var(--glass) / 0.62);
-  color: var(--ink-soft);
-  font-weight: 425;
-  -webkit-backdrop-filter: blur(40px);
-  backdrop-filter: blur(40px);
-  box-shadow:
-    0 0 0 1.2px rgb(var(--line) / 0.1),
-    inset 1px 1px 0 rgb(var(--glass) / 0.5),
-    0 8px 22px rgb(var(--shade) / 0.035);
+  background: linear-gradient(145deg, rgba(26, 34, 36, 0.86), rgba(16, 29, 33, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.21);
+  color: #fff;
+  font-weight: 430;
+  -webkit-backdrop-filter: blur(14px) saturate(108%);
+  backdrop-filter: blur(14px) saturate(108%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.44);
 }
 .ds-cta--glass .ds-knob {
-  background: var(--meet-knob);
+  background: rgba(3, 5, 7, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 .ds-cta--back {
-  padding: 0 22px 0 7px;
-  height: 52px;
-}
-.ds-cta--back .ds-knob {
-  width: 38px;
-  height: 38px;
+  padding: 0 18px 0 5px;
 }
 .ds-cta--back .ds-knob svg {
   transform: scaleX(-1);
 }
-/* the hero's "Meet Sentinel" pill — thumbnail sphere, label, knob */
+/* the demo card's thumbnail pill — smoke thumbnail, label, knob */
 .ds-guide {
-  height: 76px;
-  padding: 0 12px 0 10px;
+  height: 64px;
+  padding: 0 8px;
   gap: 14px;
+  border-radius: 14px;
 }
 .ds-guide .ds-thumb {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  border-radius: 9px;
   flex: none;
-  background: var(--plate) 60% 50% / 340% auto no-repeat;
-  box-shadow: inset 0 0 0 1px rgb(var(--glass) / 0.45);
+  background: var(--plate);
+  filter: brightness(0.89) saturate(0.93) contrast(1.03);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 .ds-guide .ds-knob {
   margin-left: 18px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .ds-cta {
-    transition: transform 0.35s var(--ease-soft);
+  button,
+  a {
+    transition:
+      filter 140ms ease,
+      opacity 140ms ease;
   }
-  .ds-cta:hover {
-    transform: translateY(-2px);
+  .ds-cta:hover,
+  .ds-pill:hover {
+    filter: brightness(1.08);
   }
 }
 a:focus-visible,
@@ -394,6 +324,7 @@ button:focus-visible,
   outline: 2px solid var(--focus);
   outline-offset: 3px;
 }
+
 
 /* ── hero type ── */
 .ds-eyebrow {
@@ -406,10 +337,14 @@ button:focus-visible,
 }
 .ds-h1 {
   margin: 14px 0 0;
+  font-family: "Reference Display", "Reference Sans", var(--font-sans), Arial, sans-serif;
   font-size: clamp(44px, 6.6vw, 88px);
-  font-weight: 360;
-  letter-spacing: -0.035em;
-  line-height: 0.95;
+  font-weight: 500;
+  font-optical-sizing: auto;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  -webkit-text-stroke: 0.12px currentColor;
+  text-shadow: 0 2px 2px rgba(0, 0, 0, 0.44);
   color: var(--ink);
   text-wrap: balance;
 }
@@ -860,10 +795,6 @@ button:focus-visible,
   .ds-shell {
     padding: 20px 20px 40px;
   }
-  .ds-header {
-    display: flex;
-    justify-content: space-between;
-  }
   .ds-burger {
     display: flex;
   }
@@ -873,8 +804,9 @@ button:focus-visible,
     right: 0;
     width: min(320px, calc(100vw - 40px));
     padding: 14px;
-    border-radius: 28px;
-    background: rgb(var(--glass) / 0.9);
+    border-radius: 16px;
+    -webkit-backdrop-filter: blur(18px) saturate(110%);
+    backdrop-filter: blur(18px) saturate(110%);
     display: grid;
     gap: 12px;
     opacity: 0;
@@ -890,6 +822,13 @@ button:focus-visible,
     opacity: 1;
     visibility: visible;
     transform: none;
+  }
+  .ds-menu .ds-nav a {
+    padding: 12px 6px;
+  }
+  .ds-menu .ds-nav a[aria-current="page"]::after {
+    bottom: 6px;
+    left: 6px;
   }
   .ds-menu .ds-nav {
     position: static;
@@ -922,7 +861,7 @@ button:focus-visible,
   }
   .ds-glass {
     padding: 22px 20px;
-    border-radius: 24px;
+    border-radius: 14px;
   }
   .ds-tag {
     font-size: 19px;
@@ -931,6 +870,14 @@ button:focus-visible,
 @media (min-width: 901px) {
   .ds-menu {
     display: contents;
+  }
+  .ds-nav.ds-pill {
+    margin-left: clamp(28px, 3.03vw, 48px);
+    background: none;
+    border: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }
 @media (max-width: 640px) {
@@ -981,61 +928,6 @@ button:focus-visible,
   }
 }
 
-/* ── theme switch: sun · moon track with a sliding knob ── */
-.ds-theme {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: none;
-  width: 76px;
-  height: 40px;
-  padding: 0 11px;
-  cursor: pointer;
-  color: var(--nav-ink);
-}
-.ds-theme svg {
-  position: relative;
-  z-index: 1;
-  width: 17px;
-  height: 17px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: color 0.3s var(--ease-soft);
-}
-.ds-theme i {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 32px;
-  height: 30px;
-  border-radius: 999px;
-  background: var(--cta);
-  transition: transform 0.35s var(--ease-glass);
-}
-.ds-theme .ds-theme-sun,
-.ds-theme[data-on] .ds-theme-moon {
-  color: var(--cta-ink);
-}
-.ds-theme[data-on] .ds-theme-sun {
-  color: var(--nav-ink);
-}
-.ds-theme[data-on] i {
-  transform: translateX(34px);
-}
-.ds-theme:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-@media (prefers-reduced-motion: reduce) {
-  .ds-theme i,
-  .ds-theme svg {
-    transition: none;
-  }
-}
 
 /* ════════ attention board (`dv-*`) — same glass and type as the rest ════════ */
 .dv-bar {

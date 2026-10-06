@@ -8,7 +8,7 @@ export default function SiteHeader({ current, sectorHref }: { current: Page; sec
   return (
     <Header
       items={[
-        { label: "Peringkat", icon: <HomeIcon />, href: "/", current: current === "board" },
+        { label: "Peringkat", icon: <HomeIcon />, href: "/dashboard", current: current === "board" },
         { label: "Sektor", icon: <GridIcon />, href: sectorHref ?? "/sector/industrials", current: current === "sector" },
         { label: "Metodologi", icon: <BookIcon />, href: "/methodology", current: current === "methodology", divider: true },
       ]}

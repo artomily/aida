@@ -72,7 +72,7 @@ export const BookIcon = () => (
 
 export const Chevron = () => (
   <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
-    <path d="m6.6 3.6 6 5.4-6 5.4" stroke="var(--cta-ink)" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="m6.6 3.6 6 5.4-6 5.4" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -397,3 +397,9 @@ export function SplitBar({ ratio, faded }: { ratio: number; faded?: boolean }) {
     </div>
   );
 }
+
+/* ── backdrop ── */
+
+/** The landing page's cinematic loop, dimmed so data stays legible. */
+export const BACKDROP_VIDEO =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260808_064556_051587f1-74a1-4336-8c05-4dde3594ed05.mp4";

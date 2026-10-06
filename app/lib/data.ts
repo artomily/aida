@@ -9,5 +9,17 @@ import type { Snapshot } from "../../scoring/types";
  */
 export async function loadSnapshot(date?: string): Promise<Snapshot | null> {
   await connection();
-  return (await getStore()).getSnapshot(date);
+  const store = await getStore();
+  // Neon's HTTP driver can fail transiently (cold start after scale-to-zero); retry once, then degrade.
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await store.getSnapshot(date);
+    } catch (err) {
+      if (attempt >= 1) {
+        console.error("loadSnapshot failed", err);
+        return null;
+      }
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  }
 }

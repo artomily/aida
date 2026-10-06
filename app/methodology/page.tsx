@@ -50,7 +50,6 @@ export default async function Methodology() {
 
   return (
     <>
-      <div className="ds-plate" aria-hidden="true" />
       <div className="ds-shell">
         <SiteHeader current="methodology" sectorHref={snapshot ? `/sector/${snapshot.sectors[0].slug}` : undefined} />
         <main>

@@ -35,10 +35,9 @@ export default async function Admin() {
 
   return (
     <>
-      <div className="ds-plate" aria-hidden="true" />
       <div className="ds-shell">
         <header className="dv-adminbar">
-          <Link href="/" className="ds-link">
+          <Link href="/dashboard" className="ds-link">
             ← Lihat seperti user
           </Link>
           <span>

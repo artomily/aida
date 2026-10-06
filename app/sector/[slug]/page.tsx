@@ -22,12 +22,11 @@ export default async function SectorPage({ params }: PageProps<"/sector/[slug]">
 
   return (
     <>
-      <div className="ds-plate" aria-hidden="true" />
       <div className="ds-shell">
         <SiteHeader current="sector" sectorHref={`/sector/${slug}`} />
         <main>
           <nav className="dv-switch" aria-label="Pindah sektor">
-            <Cta variant="back" href="/">
+            <Cta variant="back" href="/dashboard">
               Peringkat
             </Cta>
             {SECTORS.map((x) => (
