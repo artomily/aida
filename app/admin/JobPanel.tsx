@@ -21,6 +21,7 @@ const JOBS: { job: JobName; label: string; note: string; confirm?: string }[] = 
 export default function JobPanel() {
   const [state, action, pending] = useActionState<JobState, FormData>(runJob, {});
   const [active, setActive] = useState<JobName | null>(null);
+  const [force, setForce] = useState(false);
 
   return (
     <div>
@@ -35,6 +36,7 @@ export default function JobPanel() {
             }}
           >
             <input type="hidden" name="job" value={j.job} />
+            {force && <input type="hidden" name="force" value="on" />}
             <button type="submit" className={`dv-job ${j.job === "pipeline" ? "dv-job--primary" : ""}`} disabled={pending}>
               <b>{pending && active === j.job ? "Berjalan…" : j.label}</b>
               <small>{j.note}</small>
@@ -42,6 +44,10 @@ export default function JobPanel() {
           </form>
         ))}
       </div>
+      <label className="dv-force">
+        <input type="checkbox" checked={force} onChange={(e) => setForce(e.target.checked)} />
+        Paksa jalankan walau data hari ini sudah ada (tetap dibatasi kuota harian)
+      </label>
       {state.message !== undefined && (
         <p role="status" className={`dv-result dv-result--${state.status}`}>
           <strong>{state.job}</strong> · {state.status} · {state.message}

@@ -16,6 +16,7 @@ export const companies = pgTable("companies", {
   name: text("name").notNull(),
   market: text("market").notNull(),
   sectorSlug: text("sector_slug"),
+  subSector: text("sub_sector"),
   marketCap: doublePrecision("market_cap"),
   updatedAt: timestamp("updated_at", { mode: "string", withTimezone: true }).notNull().defaultNow(),
 });

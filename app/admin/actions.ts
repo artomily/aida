@@ -44,6 +44,7 @@ const SLICE_MS = 240_000;
 export async function runJob(_: JobState, form: FormData): Promise<JobState> {
   await requireAdmin();
   const job = String(form.get("job")) as JobName;
+  const force = form.get("force") === "on";
   const ctx = await context();
   const deadline = Date.now() + SLICE_MS;
 
@@ -77,7 +78,7 @@ export async function runJob(_: JobState, form: FormData): Promise<JobState> {
       default:
         throw new Error(`Job tidak dikenal: ${job}`);
     }
-  });
+  }, { force });
   refresh();
   return { job, status: run.status === "running" ? "error" : run.status, message: run.message ?? "", calls: run.upstreamCalls };
 }

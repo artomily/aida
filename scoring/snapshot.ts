@@ -20,6 +20,7 @@ import type {
   NewsItem,
   OwnershipTx,
   PriceRow,
+  SectorStructure,
   SensitivityResult,
   Snapshot,
   SnapshotMode,
@@ -86,5 +87,29 @@ export function buildSnapshot(input: SnapshotInput): Omit<Snapshot, "brief"> {
       ownershipMatches: ownershipCrossCheck(input.ownership, input.aliases),
     },
     notes,
+    structure: sectorStructure(input.companies),
   };
+}
+
+/** IDX sector → sub-sector breakdown by market cap, with the five largest emiten per sub-sector. */
+export function sectorStructure(companies: Company[], topN = 5): Partial<Record<SectorSlug, SectorStructure>> {
+  const out: Partial<Record<SectorSlug, SectorStructure>> = {};
+  for (const c of companies) {
+    if (c.market !== "IDX" || !c.sector) continue;
+    const cap = c.marketCap ?? 0;
+    const sec = (out[c.sector] ??= { companies: 0, marketCap: 0, subsectors: [] });
+    sec.companies++;
+    sec.marketCap += cap;
+    const name = c.subSector ?? "Lainnya";
+    let sub = sec.subsectors.find((x) => x.name === name);
+    if (!sub) sec.subsectors.push((sub = { name, companies: 0, marketCap: 0, top: [] }));
+    sub.companies++;
+    sub.marketCap += cap;
+    sub.top.push({ symbol: c.symbol, name: c.name, marketCap: cap });
+  }
+  for (const sec of Object.values(out)) {
+    sec!.subsectors.sort((a, b) => b.marketCap - a.marketCap);
+    for (const sub of sec!.subsectors) sub.top = sub.top.sort((a, b) => b.marketCap - a.marketCap).slice(0, topN);
+  }
+  return out;
 }

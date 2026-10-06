@@ -1,0 +1,337 @@
+/* Dashboard (`/dashboard`) — dense, data-first terminal layout. Classes are `tm-*`. */
+
+.tm-shell {
+  max-width: 1480px;
+  padding-top: 20px;
+}
+
+.tm-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 12px;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tm-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok-ink);
+  box-shadow: 0 0 0 3px rgb(143 214 174 / 0.15);
+}
+.tm-dot--warn {
+  background: var(--warn-ink);
+  box-shadow: 0 0 0 3px rgb(232 196 110 / 0.15);
+}
+.tm-sep {
+  width: 1px;
+  height: 11px;
+  background: var(--hair);
+}
+.tm-status-note {
+  margin-left: auto;
+  color: var(--warn-ink);
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: help;
+}
+
+/* ── KPI strip ── */
+.tm-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.tm-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  min-width: 0;
+}
+.tm-kpi + .tm-kpi {
+  border-left: 1px solid var(--hair);
+}
+.tm-kpi-label {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tm-kpi-value {
+  font-size: 22px;
+  font-weight: 520;
+  line-height: 1.15;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tm-kpi-sub {
+  font-size: 12px;
+  color: var(--dim);
+}
+
+/* ── panels ── */
+.tm-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 12px;
+  align-items: start;
+}
+.tm-side {
+  display: grid;
+  gap: 12px;
+}
+.tm-panel {
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.tm-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 38px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--hair);
+}
+.tm-panel-head h2 {
+  font-size: 12px;
+  font-weight: 560;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.tm-panel-right,
+.tm-panel-right a {
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.tm-panel-right a:hover {
+  color: var(--ink);
+}
+
+/* ── ranking table ── */
+.tm-table-wrap {
+  overflow-x: auto;
+}
+.tm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tm-table th {
+  position: sticky;
+  top: 0;
+  padding: 9px 12px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface);
+  border-bottom: 1px solid var(--hair);
+}
+.tm-table td {
+  padding: 0 12px;
+  height: 40px;
+  text-align: right;
+  color: var(--ink-soft);
+  border-bottom: 1px solid rgb(255 255 255 / 0.05);
+}
+.tm-table .l {
+  text-align: left;
+}
+.tm-table tbody tr:hover td {
+  background: rgb(255 255 255 / 0.035);
+}
+.tm-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.tm-name {
+  color: var(--ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+.tm-name:hover {
+  color: var(--accent);
+}
+.tm-dim {
+  color: var(--dim);
+}
+.tm-att {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.tm-att b {
+  font-weight: 560;
+  color: var(--ink);
+  min-width: 2.6em;
+}
+.tm-bar {
+  display: block;
+  width: 90px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--track);
+  overflow: hidden;
+}
+.tm-bar i {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background: var(--track-fill);
+  border-radius: 3px;
+}
+.tm-spark-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.tm-spark {
+  width: 72px;
+  height: 20px;
+}
+
+.tm-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.tm-tag--pos {
+  color: var(--pos);
+  background: rgb(127 178 226 / 0.12);
+}
+.tm-tag--neg {
+  color: var(--neg);
+  background: rgb(228 132 102 / 0.12);
+}
+.tm-tag--flat {
+  color: var(--ink-soft);
+  background: rgb(255 255 255 / 0.07);
+}
+
+/* ── heatmap ── */
+.tm-heat {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  padding: 10px;
+}
+.tm-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 58px;
+  padding: 8px 9px;
+  border-radius: 4px;
+  color: #fff;
+  text-decoration: none;
+  transition: filter 0.15s;
+}
+.tm-tile:hover {
+  filter: brightness(1.2);
+}
+.tm-tile span {
+  font-size: 11.5px;
+  line-height: 1.2;
+  opacity: 0.9;
+}
+.tm-tile b {
+  font-size: 15px;
+  font-weight: 560;
+}
+
+/* ── feed ── */
+.tm-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tm-feed li {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
+  padding: 9px 14px;
+  font-size: 12.5px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.05);
+}
+.tm-feed li:last-child {
+  border-bottom: 0;
+}
+.tm-feed-time {
+  color: var(--dim);
+  padding-top: 2px;
+}
+.tm-feed-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.tm-feed-entity {
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tm-feed-sector {
+  color: var(--muted);
+  text-decoration: none;
+}
+.tm-feed-sector:hover {
+  color: var(--ink);
+}
+.tm-empty,
+.tm-brief {
+  padding: 12px 14px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.tm-empty {
+  color: var(--dim);
+}
+
+@media (max-width: 1100px) {
+  .tm-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tm-side {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .tm-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tm-kpi + .tm-kpi {
+    border-left: 0;
+  }
+  .tm-kpi {
+    border-bottom: 1px solid var(--hair);
+  }
+  .tm-kpi:nth-child(even) {
+    border-left: 1px solid var(--hair);
+  }
+}

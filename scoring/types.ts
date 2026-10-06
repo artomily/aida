@@ -63,6 +63,8 @@ export type Company = {
   market: Market;
   /** Scored sector, or null when the provider label maps to none (e.g. Listed Investment Product). */
   sector: SectorSlug | null;
+  /** Provider sub-sector label, as given; absent on rows ingested before it was stored. */
+  subSector?: string | null;
   /** In listing currency (IDR / SGD). */
   marketCap: number | null;
 };
@@ -224,4 +226,18 @@ export type Snapshot = {
     ownershipMatches: { sgxEntity: string; holderName: string; symbol: string; date: string }[];
   };
   notes: string[];
+  /** IDX sector → sub-sector → largest emiten; absent on snapshots built before it existed. */
+  structure?: Partial<Record<SectorSlug, SectorStructure>>;
+};
+
+export type SectorStructure = {
+  companies: number;
+  /** IDR. */
+  marketCap: number;
+  subsectors: {
+    name: string;
+    companies: number;
+    marketCap: number;
+    top: { symbol: string; name: string; marketCap: number }[];
+  }[];
 };

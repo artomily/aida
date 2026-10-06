@@ -10,7 +10,7 @@
  *
  * sectors.app prices are end-of-day, so the snapshot always scores the previous session.
  */
-import { isMock } from "../ingest/client";
+import { isMock, UpstreamError } from "../ingest/client";
 import { loadControls } from "../ingest/controls";
 import { fetchSgxNews } from "../ingest/news";
 import { fetchFilings } from "../ingest/ownership";
@@ -46,6 +46,7 @@ export async function catchUpPrices(
   const coverage = new Map((await store.priceCoverage()).map((c) => [c.symbol, c]));
   let rows = 0;
   let done = 0;
+  const missing: string[] = [];
   for (const symbol of symbols) {
     if (opts.deadline && Date.now() > opts.deadline) break;
     const c = coverage.get(symbol);
@@ -55,13 +56,20 @@ export async function catchUpPrices(
           ...(opts.fillBack && c.first > nextDay(daysAgo(from, -6)) ? [[from, daysAgo(c.first, 1)] as [string, string]] : []),
           ...(nextDay(c.last) <= to ? [[nextDay(c.last), to] as [string, string]] : []),
         ];
-    for (const [a, b] of ranges) {
-      const got = await fetchHistory(symbol, a, b);
-      await store.putPrices(got);
-      rows += got.length;
+    try {
+      for (const [a, b] of ranges) {
+        const got = await fetchHistory(symbol, a, b);
+        await store.putPrices(got);
+        rows += got.length;
+      }
+    } catch (e) {
+      // A delisted or renamed symbol must not stop the rest; it still costs a credit per run.
+      if (!(e instanceof UpstreamError && e.status === 404)) throw e;
+      missing.push(symbol);
     }
     done++;
   }
+  if (missing.length) log(job, `not found upstream, skipped: ${missing.join(", ")}`);
   log(job, `${done}/${symbols.length} symbols current, ${rows} new closes`);
   return { complete: done === symbols.length, done, total: symbols.length, rows };
 }

@@ -40,13 +40,14 @@ export function pgStore(db: Db): Store {
       await chunked(rows, 1000, (c) =>
         db
           .insert(t.companies)
-          .values(c.map((r) => ({ symbol: r.symbol, name: r.name, market: r.market, sectorSlug: r.sector, marketCap: r.marketCap })))
+          .values(c.map((r) => ({ symbol: r.symbol, name: r.name, market: r.market, sectorSlug: r.sector, subSector: r.subSector ?? null, marketCap: r.marketCap })))
           .onConflictDoUpdate({
             target: t.companies.symbol,
             set: {
               name: excluded("name"),
               market: excluded("market"),
               sectorSlug: excluded("sector_slug"),
+              subSector: excluded("sub_sector"),
               marketCap: excluded("market_cap"),
               updatedAt: sql`now()`,
             },
@@ -60,6 +61,7 @@ export function pgStore(db: Db): Store {
         name: r.name,
         market: r.market as Market,
         sector: r.sectorSlug as SectorSlug | null,
+        subSector: r.subSector,
         marketCap: r.marketCap,
       }));
     },

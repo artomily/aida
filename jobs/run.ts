@@ -5,6 +5,8 @@
  *   npm run ingest:backfill -- --yes       run it
  *   npm run job:daily -- [sgx|news|score|pipeline]
  *   npm run job:weekly
+ *
+ * Daily / weekly jobs skip themselves when today's work is done; add --force to run anyway.
  */
 import { hasKey, isMock } from "../ingest/client";
 import { defaultBackfill, planBackfill, runBackfill } from "./backfill";
@@ -39,17 +41,17 @@ async function main() {
     }
     case "daily": {
       const stage = (args.find((a) => ["sgx", "news", "score", "pipeline"].includes(a)) ?? "pipeline") as Stage;
-      run = await recorded(ctx, stage, "cli", async () => ({ status: "ok", message: await runDaily(ctx, stage, asOf) }));
+      run = await recorded(ctx, stage, "cli", async () => ({ status: "ok", message: await runDaily(ctx, stage, asOf) }), { force: flag("--force") });
       break;
     }
     case "weekly":
       run = await recorded(ctx, "weekly", "cli", async () => {
         const r = await runWeeklyBeta(ctx, asOf);
         return { status: "ok", message: `${[...r.values()].filter((x) => x.significant).length}/11 sektor signifikan` };
-      });
+      }, { force: flag("--force") });
       break;
     default:
-      console.log("usage: tsx jobs/run.ts <backfill|daily|weekly> [stage] [YYYY-MM-DD] [--plan|--yes]");
+      console.log("usage: tsx jobs/run.ts <backfill|daily|weekly> [stage] [YYYY-MM-DD] [--plan|--yes|--force]");
       process.exitCode = 1;
       return;
   }

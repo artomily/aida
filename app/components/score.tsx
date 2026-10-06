@@ -23,23 +23,17 @@ export function Pill({ children, tone = "info" }: { children: ReactNode; tone?: 
 export function DataChip({ snapshot }: { snapshot: Snapshot }) {
   return (
     <span className="ds-chip ds-pill" style={{ height: 30, padding: "0 12px", fontSize: 13 }}>
-      <i style={snapshot.mode === "mock" ? { background: "var(--warn-ink)" } : undefined} />
-      {snapshot.mode === "mock" ? "Data sintetis (server mock)" : `Snapshot ${timeLabel(snapshot.generatedAt)} WIB`}
+      <i />
+      {`Snapshot ${timeLabel(snapshot.generatedAt)} WIB`}
     </span>
   );
 }
 
-/** Mock data and pipeline caveats, said up front rather than in a footnote. */
+/** Pipeline caveats, said up front rather than in a footnote. */
 export function Notices({ snapshot }: { snapshot: Snapshot }) {
-  if (snapshot.mode !== "mock" && !snapshot.notes.length) return null;
+  if (!snapshot.notes.length) return null;
   return (
     <Glass delay={0} className="dv-notice">
-      {snapshot.mode === "mock" && (
-        <p>
-          <strong>Mode mock.</strong> Angka di halaman ini dihitung dari data sintetis server mock lokal untuk menguji
-          pipeline — bukan data pasar.
-        </p>
-      )}
       {snapshot.notes.map((n) => (
         <p key={n}>{n}</p>
       ))}

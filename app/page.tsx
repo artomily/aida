@@ -175,7 +175,6 @@ function Info({ snapshot }: { snapshot: Snap }) {
         ) : (
           <p className="vt-lead">Belum ada snapshot. Peringkat muncul setelah backfill pertama dijalankan.</p>
         )}
-        {snapshot?.mode === "mock" && <p className="vt-note">Data sintetis dari server mock — bukan data pasar.</p>}
         <Link className="vt-white-btn" href="/dashboard">
           Lihat 11 sektor
           <span className="vt-arrow-box vt-arrow-box--inline" aria-hidden="true">

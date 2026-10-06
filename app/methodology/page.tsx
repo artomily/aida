@@ -57,9 +57,7 @@ export default async function Methodology() {
             eyebrow="Metodologi"
             title={
               <>
-                Kami menguji keterkaitannya,
-                <br />
-                bukan mengasumsikannya
+                Kami menguji keterkaitannya, bukan mengasumsikannya
               </>
             }
             tag="Lebih dari 20 perusahaan SGX beroperasi utama di Indonesia, dan beberapa emiten besar IDX dimiliki entitas Singapura. Apakah itu menghasilkan sinyal? Kami uji per sektor, dan melaporkan di mana ia berlaku dan di mana tidak."
@@ -71,15 +69,8 @@ export default async function Methodology() {
                   big={`${v.significant} / 11`}
                   sub={
                     <>
-                      sektor lolos koreksi BH
-                      <br />
-                      pada α = {dec(v.alpha)} · arah balik {v.reverseSignificant} / 11
-                      {v.sameDaySignificant !== undefined && (
-                        <>
-                          <br />
-                          bergerak bersama di hari yang sama (T+0) {v.sameDaySignificant} / 11
-                        </>
-                      )}
+                      sektor lolos koreksi BH pada α = {dec(v.alpha)} · arah balik {v.reverseSignificant} / 11
+                      {v.sameDaySignificant !== undefined && <> · T+0 hari yang sama {v.sameDaySignificant} / 11</>}
                     </>
                   }
                   scale={["0", "3", "6", "9", "11"]}
@@ -218,7 +209,7 @@ Confidence  = korelasi bergulir 60 hari         # ditampilkan terpisah, tidak di
               ))}
               {v && v.ownershipMatches.length > 0 && (
                 <>
-                  <h3 className="ds-h2" style={{ fontSize: 16, margin: "18px 0 6px" }}>
+                  <h3 className="ds-h2" style={{ margin: "18px 0 6px" }}>
                     Terlihat di data kepemilikan IDX
                   </h3>
                   {v.ownershipMatches.map((m) => (

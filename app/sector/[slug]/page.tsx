@@ -5,6 +5,7 @@ import { SECTOR_NAME, SECTORS, isSectorSlug } from "../../../scoring/sectors";
 import type { SectorScore } from "../../../scoring/types";
 import { ATTENTION_MAX, CorrelationChart, DataChip, EmptyState, Footer, Notices, Pill } from "../../components/score";
 import SiteHeader from "../../components/SiteHeader";
+import { SubsectorCard } from "../../components/Structure";
 import { Arrow, Cta, Glass, Hero, MeterPanel, NEG, POS, SectionHead, TargetIcon } from "../../components/ui";
 import { loadSnapshot } from "../../lib/data";
 import { DIRECTION_LABEL, RELATION_LABEL, ago, bare, dateLabel, dec, eventLabel, pct, pval, signed } from "../../lib/format";
@@ -90,6 +91,8 @@ function Detail({ s, snapshot }: { s: SectorScore; snapshot: NonNullable<Awaited
       />
 
       <Notices snapshot={snapshot} />
+
+      <SubsectorCard structure={snapshot.structure?.[s.slug]} />
 
       <div className="ds-grid ds-split" style={{ gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)" }}>
         <Glass delay={200}>

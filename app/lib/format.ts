@@ -48,3 +48,10 @@ export function ago(iso: string, now = Date.now()) {
   if (h < 24) return `${h} jam lalu`;
   return `${Math.round(h / 24)} hari lalu`;
 }
+
+/** IDR market cap, compact: Rp 1.234 T / Rp 56 M. */
+export function idr(v: number | null | undefined) {
+  if (v == null) return "—";
+  const [div, unit] = v >= 1e12 ? [1e12, "T"] : v >= 1e9 ? [1e9, "M"] : [1e6, "jt"];
+  return `Rp ${(v / div).toLocaleString("id-ID", { maximumFractionDigits: v / div < 10 ? 1 : 0 })} ${unit}`;
+}

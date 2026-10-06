@@ -31,6 +31,7 @@ export async function fetchCompanies(market: Market): Promise<Company[]> {
       name: r.company_name,
       market,
       sector: toSectorSlug(str(q.sector), str(q.sub_sector)),
+      subSector: str(q.sub_sector) ?? null,
       marketCap: num(q.market_cap),
     };
   });
