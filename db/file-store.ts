@@ -1,5 +1,5 @@
 /**
- * Local stand-in for Postgres: one JSON file per table under DIVERGENCE_DATA_DIR (default
+ * Local stand-in for Postgres: one JSON file per table under AIDA_DATA_DIR (default
  * `.data/`). Writes go to a temp file and are renamed into place, so the dev server never
  * reads a half-written table while a job runs.
  */
@@ -9,7 +9,7 @@ import type { SectorSlug } from "../scoring/sectors";
 import type { ControlRow, NewsItem, OwnershipTx, PriceRow, SensitivityResult, Snapshot } from "../scoring/types";
 import type { JobRun, PriceCoverage, Store } from "./store";
 
-export function fileStore(dir = process.env.DIVERGENCE_DATA_DIR ?? path.join(process.cwd(), ".data")): Store {
+export function fileStore(dir = process.env.AIDA_DATA_DIR ?? path.join(process.cwd(), ".data")): Store {
   const file = (name: string) => path.join(dir, name + ".json");
 
   function read<T>(name: string, fallback: T): T {

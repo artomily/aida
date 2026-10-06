@@ -10,7 +10,7 @@ import type { SectorScore, Snapshot } from "../scoring/types";
 
 const MODEL = "claude-opus-5";
 
-const SYSTEM = `Kamu menulis "Ringkasan Pagi" untuk dasbor Divergence: skor perhatian sektor IDX berdasarkan keterkaitan dengan bursa Singapura.
+const SYSTEM = `Kamu menulis "Ringkasan Pagi" untuk dasbor Aida: skor perhatian sektor IDX berdasarkan keterkaitan dengan bursa Singapura.
 
 Aturan:
 - Tulis satu paragraf bahasa Indonesia, 3–5 kalimat, untuk investor ritel yang tidak terbiasa statistik.

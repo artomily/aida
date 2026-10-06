@@ -11,7 +11,7 @@ import { loadSnapshot } from "../lib/data";
 import { RELATION_LABEL, bare, dec, eventLabel, pct, pval } from "../lib/format";
 
 export const metadata: Metadata = {
-  title: "Metodologi — Divergence",
+  title: "Metodologi — Aida",
   description: "Cara skor perhatian dihitung, hasil uji lead-lag SGX → IDX per sektor, dan keterbatasannya.",
 };
 
@@ -75,6 +75,12 @@ export default async function Methodology() {
                       sektor lolos koreksi BH
                       <br />
                       pada α = {dec(v.alpha)} · arah balik {v.reverseSignificant} / 11
+                      {v.sameDaySignificant !== undefined && (
+                        <>
+                          <br />
+                          bergerak bersama di hari yang sama (T+0) {v.sameDaySignificant} / 11
+                        </>
+                      )}
                     </>
                   }
                   scale={["0", "3", "6", "9", "11"]}
@@ -112,7 +118,7 @@ Confidence  = korelasi bergulir 60 hari         # ditampilkan terpisah, tidak di
               title="Uji lead-lag per sektor"
               note={
                 v
-                  ? `r_IDX(t) = a + b₁·r_SGX(t−1) + kontrol + e · jendela ${v.window} hari bursa · riwayat ${v.history.days} hari (${v.history.from ?? "—"} s/d ${v.history.to ?? "—"}) · p dikoreksi Benjamini–Hochberg di 11 sektor · stabilitas = porsi jendela bergulir dengan tanda β yang sama.`
+                  ? `T+1: r_IDX(t) = a + b₁·r_SGX(t−1) + kontrol + e — yang dipakai skor. T+0: r_SGX(t) di hari yang sama — hanya menunjukkan seberapa erat kedua pasar bergerak bersama, tidak bisa dipakai sebelum IDX buka, jadi tidak masuk skor. Jendela ${v.window} hari bursa · riwayat ${v.history.days} hari (${v.history.from ?? "—"} s/d ${v.history.to ?? "—"}) · p dikoreksi Benjamini–Hochberg di 11 sektor · stabilitas = porsi jendela bergulir dengan tanda β yang sama.`
                   : "Belum ada snapshot — jalankan backfill untuk mengisi tabel ini."
               }
             />
@@ -125,7 +131,13 @@ Confidence  = korelasi bergulir 60 hari         # ditampilkan terpisah, tidak di
                       <th style={{ textAlign: "left" }}>Seri SGX</th>
                       <th style={{ textAlign: "right" }}>n</th>
                       <th style={{ textAlign: "right" }}>
-                        β<small>SG → ID</small>
+                        β T+0<small>hari yang sama</small>
+                      </th>
+                      <th style={{ textAlign: "right" }}>
+                        p<small>terkoreksi</small>
+                      </th>
+                      <th style={{ textAlign: "right" }}>
+                        β T+1<small>SG kemarin → ID</small>
                       </th>
                       <th style={{ textAlign: "right" }}>p</th>
                       <th style={{ textAlign: "right" }}>
@@ -153,6 +165,10 @@ Confidence  = korelasi bergulir 60 hari         # ditampilkan terpisah, tidak di
                           </td>
                           <td style={{ color: "var(--muted2)" }}>{r.sgxSeries === "sti" ? "STI" : "keranjang terkait"}</td>
                           <td className="tnum" style={{ textAlign: "right" }}>{r.n}</td>
+                          <td className="tnum" style={{ textAlign: "right" }}>{dec(r.sameDay?.beta ?? null, 3)}</td>
+                          <td className="tnum" style={{ textAlign: "right", color: r.sameDay?.significant ? "var(--ok-ink)" : undefined }}>
+                            {pval(r.sameDay?.pAdjusted ?? null)}
+                          </td>
                           <td className="tnum" style={{ textAlign: "right" }}>{dec(r.beta, 3)}</td>
                           <td className="tnum" style={{ textAlign: "right" }}>{pval(r.pValue)}</td>
                           <td className="tnum" style={{ textAlign: "right", color: r.significant ? "var(--ok-ink)" : undefined, fontWeight: r.significant ? 600 : undefined }}>

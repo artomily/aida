@@ -3,7 +3,7 @@
  * every request, so call volume can be measured before spending real credits.
  *
  *   npm run mock:sectors                      (listens on :4010)
- *   SECTORS_API_BASE=http://127.0.0.1:4010/v2 SECTORS_API_KEY=mock DIVERGENCE_DATA_DIR=.data-mock npm run ingest:backfill
+ *   SECTORS_API_BASE=http://127.0.0.1:4010/v2 SECTORS_API_KEY=mock AIDA_DATA_DIR=.data-mock npm run ingest:backfill
  *
  * GET /__stats returns per-endpoint counts; GET /__reset zeroes them.
  *

@@ -89,6 +89,11 @@ r_IDX(t) = a + b1*r_SGX(t-1) + b2*r_SPX_fut + b3*d(USDIDR) + b4*r_HSI + e
 - Lead-lag tested in **both directions** — the thesis includes ID→SG influence
 - "Lagged" means the other market's previous session, not index − 1: SGX and IDX keep
   different holidays
+- **T+0 vs T+1.** The lagged regression above is T+1 (yesterday's SGX → today's IDX) and is the
+  only one scored. T+0, `r_IDX(t)` on the same day's `r_SGX(t)`, is estimated and
+  BH-corrected alongside it and shown on the methodology page: it measures how tightly the two
+  markets move together, but it cannot be acted on before the IDX open, so it never enters the
+  score
 - `r_SGX` is the exposure-weighted basket of the sector's linked SGX entities, or the STI
   when a sector has no linked entity with enough history
 
@@ -132,7 +137,7 @@ investment vehicles rather than operating companies, so its returns are derivati
 sectors and would produce spurious correlation.
 
 IDX-IC sector indices are not available upstream, so each sector's daily return is the
-market-cap-weighted return of its 5 largest emiten (`DIVERGENCE_TOP_N`).
+market-cap-weighted return of its 5 largest emiten (`AIDA_TOP_N`).
 
 Sub-sector level (~35) is used for display drill-down only, never for scoring — testing 35
 hypotheses would surface false positives by chance alone.
@@ -189,7 +194,7 @@ exposing any raw price or news payload.
 A single Next.js package; the module boundaries follow the plan without a workspace split.
 
 ```
-divergence/
+aida/
 ├── app/                          # Next.js dashboard (server components)
 │   ├── page.tsx                  # sector ranking board
 │   ├── sector/[slug]/            # score breakdown + linked entities
@@ -298,7 +303,7 @@ symbols. `--plan` prints the estimate. Every raw response is cached under `.cach
 and closed historical windows never expire, so a re-run only pays for what is missing.
 
 **Free end-to-end run:** `npm run mock:sectors`, then run any job with
-`SECTORS_API_BASE=http://127.0.0.1:4010/v2 SECTORS_API_KEY=mock DIVERGENCE_DATA_DIR=.data-mock`.
+`SECTORS_API_BASE=http://127.0.0.1:4010/v2 SECTORS_API_KEY=mock AIDA_DATA_DIR=.data-mock`.
 Mock snapshots are labelled as synthetic on every page.
 
 **Controls:** sectors.app has no daily S&P futures, USD/IDR or Hang Seng series. Drop

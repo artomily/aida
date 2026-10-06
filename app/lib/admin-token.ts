@@ -9,7 +9,7 @@ export const SESSION_HOURS = 12;
 
 const key = () => {
   const password = process.env.ADMIN_PASSWORD;
-  return password ? createHash("sha256").update(`divergence-admin:${password}`).digest() : null;
+  return password ? createHash("sha256").update(`aida-admin:${password}`).digest() : null;
 };
 
 const mac = (k: Buffer, payload: string) => createHmac("sha256", k).update(payload).digest("base64url");

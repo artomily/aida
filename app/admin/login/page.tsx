@@ -3,7 +3,7 @@ import { Glass } from "../../components/ui";
 import { adminEnabled } from "../../lib/admin-token";
 import LoginForm from "./LoginForm";
 
-export const metadata: Metadata = { title: "Admin — Divergence", robots: { index: false } };
+export const metadata: Metadata = { title: "Admin — Aida", robots: { index: false } };
 
 export default function AdminLogin() {
   return (
@@ -12,7 +12,7 @@ export default function AdminLogin() {
       <div className="ds-shell">
         <main className="dv-login">
           <Glass delay={0}>
-            <p className="ds-eyebrow">Divergence · Admin</p>
+            <p className="ds-eyebrow">Aida · Admin</p>
             <h1 className="ds-h2" style={{ fontSize: 26, margin: "6px 0 18px" }}>
               Pantau data sebelum sampai ke user
             </h1>

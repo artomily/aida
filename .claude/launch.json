@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "divergence-dev",
+      "name": "aida-dev",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
         "run",
@@ -17,6 +17,21 @@
         "scripts/sectors-mock.mjs"
       ],
       "port": 4010
+    },
+    {
+      "name": "aida-dev-mock",
+      "runtimeExecutable": "env",
+      "runtimeArgs": [
+        "DATABASE_URL=",
+        "AIDA_DATA_DIR=.data-mock",
+        "npm",
+        "run",
+        "dev",
+        "--",
+        "-p",
+        "3001"
+      ],
+      "port": 3001
     }
   ]
 }

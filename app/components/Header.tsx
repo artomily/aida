@@ -72,7 +72,7 @@ export default function Header({
         }}
       >
         <BrandMark />
-        <b>Divergence</b>
+        <b>Aida</b>
       </Link>
 
       <button

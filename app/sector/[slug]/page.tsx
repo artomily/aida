@@ -11,7 +11,7 @@ import { DIRECTION_LABEL, RELATION_LABEL, ago, bare, dateLabel, dec, eventLabel,
 
 export async function generateMetadata({ params }: PageProps<"/sector/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  return { title: isSectorSlug(slug) ? `${SECTOR_NAME[slug]} — Divergence` : "Sektor — Divergence" };
+  return { title: isSectorSlug(slug) ? `${SECTOR_NAME[slug]} — Aida` : "Sektor — Aida" };
 }
 
 export default async function SectorPage({ params }: PageProps<"/sector/[slug]">) {
@@ -141,11 +141,19 @@ function Detail({ s, snapshot }: { s: SectorScore; snapshot: NonNullable<Awaited
             title={<>2 · Sensitivitas <span className="dv-score">{dec(sens.score, 3)}</span></>}
             note={`Regresi return sektor IDX pada return ${sens.sgxSeries === "sti" ? "indeks STI" : "keranjang SGX terkait"} sesi sebelumnya, jendela ${snapshot.validation.window} hari. Nol bila tidak signifikan setelah koreksi.`}
           />
-          <div className="ds-kv"><span>β (SG → ID)</span><span>{dec(sens.beta, 3)}</span></div>
+          <div className="ds-kv"><span>β T+1 (SG kemarin → ID)</span><span>{dec(sens.beta, 3)}</span></div>
           <div className="ds-kv"><span>p / p terkoreksi BH</span><span>{pval(sens.pValue)} / {pval(sens.pAdjusted)}</span></div>
           <div className="ds-kv"><span>Stabilitas tanda β</span><span>{pct(sens.stability)} dari {sens.windows} jendela</span></div>
           <div className="ds-kv"><span>R² · n</span><span>{dec(sens.r2, 3)} · {sens.n}</span></div>
           <div className="ds-kv"><span>Variabel kontrol</span><span>{sens.controls.length ? sens.controls.join(", ") : "belum tersedia"}</span></div>
+          {sens.sameDay && (
+            <div className="ds-kv">
+              <span>T+0, hari yang sama (tidak masuk skor)</span>
+              <span>
+                β {dec(sens.sameDay.beta, 3)} · p {pval(sens.sameDay.pAdjusted)}
+              </span>
+            </div>
+          )}
           <div className="ds-kv">
             <span>Arah balik (ID → SG)</span>
             <span>

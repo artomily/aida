@@ -37,7 +37,7 @@ async function main() {
     const res = sensitivityBySector(series, { ...DEFAULT_SENSITIVITY, window });
     console.log(`\n── window ${window} days · alpha ${DEFAULT_SENSITIVITY.alpha} (BH across 11 sectors) ──`);
     console.log(
-      ["sector".padEnd(26), "sgx".padEnd(13), "n".padStart(4), "β SG→ID".padStart(8), "p".padStart(7), "p_adj".padStart(7), "stab".padStart(5), "β ID→SG".padStart(8), "p_adj".padStart(7)].join(" "),
+      ["sector".padEnd(26), "sgx".padEnd(13), "n".padStart(4), "β T+0".padStart(8), "p_adj".padStart(7), "β T+1".padStart(8), "p".padStart(7), "p_adj".padStart(7), "stab".padStart(5), "β ID→SG".padStart(8), "p_adj".padStart(7)].join(" "),
     );
     for (const [slug, r] of res) {
       console.log(
@@ -45,6 +45,8 @@ async function main() {
           SECTOR_NAME[slug].padEnd(26),
           r.sgxSeries.padEnd(13),
           String(r.n).padStart(4),
+          f(r.sameDay?.beta ?? null).padStart(8),
+          (f(r.sameDay?.pAdjusted ?? null) + (r.sameDay?.significant ? "*" : " ")).padStart(7),
           f(r.beta).padStart(8),
           f(r.pValue).padStart(7),
           (f(r.pAdjusted) + (r.significant ? "*" : " ")).padStart(7),
@@ -56,7 +58,8 @@ async function main() {
     }
     const sig = [...res.values()].filter((r) => r.significant).length;
     const rev = [...res.values()].filter((r) => r.reverse.significant).length;
-    console.log(`significant SG→ID: ${sig}/11 · ID→SG: ${rev}/11 · controls used: ${[...new Set([...res.values()].flatMap((r) => r.controls))].join(", ") || "none"}`);
+    const same = [...res.values()].filter((r) => r.sameDay?.significant).length;
+    console.log(`significant T+0 (same day): ${same}/11 · T+1 SG→ID: ${sig}/11 · ID→SG: ${rev}/11 · controls used: ${[...new Set([...res.values()].flatMap((r) => r.controls))].join(", ") || "none"}`);
     if (window === DEFAULT_SENSITIVITY.window && sig === 0)
       console.log("VERDICT: no sector survives correction — report Sensitivity as not found; Exposure stands on its own as a linkage map.");
   }

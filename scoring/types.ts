@@ -140,6 +140,11 @@ export type SensitivityResult = {
   controls: ControlSeries[];
   /** ID → SG: SGX basket on lagged IDX sector return. */
   reverse: { beta: number | null; pValue: number | null; pAdjusted: number | null; significant: boolean };
+  /**
+   * T+0: IDX sector on the same day's SGX return. Co-movement only — never scored. Optional
+   * because snapshots written before it existed don't carry it.
+   */
+  sameDay?: { beta: number | null; pValue: number | null; pAdjusted: number | null; r2: number | null; significant: boolean };
 };
 
 export type FlowResult = {
@@ -208,6 +213,8 @@ export type Snapshot = {
     /** Sectors whose lagged-SGX beta survives Benjamini–Hochberg at alpha. */
     significant: number;
     reverseSignificant: number;
+    /** Sectors whose same-day (T+0) beta survives BH; absent on older snapshots. */
+    sameDaySignificant?: number;
     alpha: number;
     window: number;
     history: { from: string | null; to: string | null; days: number };

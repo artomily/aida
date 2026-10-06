@@ -138,6 +138,25 @@ describe("sensitivity", () => {
     assert.ok([...res.values()].filter((r) => r.significant).length <= 2);
   });
 
+  it("separates same-day co-movement (T+0) from the lag (T+1)", () => {
+    const n = rng(11);
+    const dates = weekdays(520);
+    const sgx: Series = new Map(dates.map((d) => [d, 0.01 * n()]));
+    // IDX moves with SGX on the same day only: T+0 should find it, the scored T+1 should not.
+    const together: Series = new Map(dates.map((d) => [d, 0.8 * sgx.get(d)! + 0.004 * n()]));
+    const idx = new Map(SECTORS.map((s) => [s.slug, s.slug === "financials" ? together : new Map(dates.map((d) => [d, 0.01 * n()]))]));
+    const res = sensitivityBySector({
+      idx,
+      sgx: new Map(SECTORS.map((s) => [s.slug, { series: sgx, source: "linked-basket" as const }])),
+      controls: new Map(),
+    });
+    const fin = res.get("financials")!;
+    assert.ok(fin.sameDay?.significant);
+    near(fin.sameDay!.beta!, 0.8, 0.05);
+    assert.equal(fin.significant, false);
+    assert.equal(fin.score, 0);
+  });
+
   it("scores zero without enough history", () => {
     const res = sensitivityBySector({ idx: new Map(), sgx: new Map(), controls: new Map() });
     assert.equal(res.get("energy")!.score, 0);

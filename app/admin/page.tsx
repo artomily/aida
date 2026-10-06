@@ -12,7 +12,7 @@ import { ago, bare, dateLabel, dec, eventLabel } from "../lib/format";
 import { logout } from "./actions";
 import JobPanel from "./JobPanel";
 
-export const metadata: Metadata = { title: "Admin — Divergence", robots: { index: false } };
+export const metadata: Metadata = { title: "Admin — Aida", robots: { index: false } };
 
 /** Server actions on this page (backfill slices, pipeline) run up to five minutes. */
 export const maxDuration = 300;

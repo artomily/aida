@@ -58,6 +58,22 @@ export function basketReturns(returns: Map<string, Series>, weights: Map<string,
 }
 
 /**
+ * Pair y(t) with x(t): both markets' returns for the same calendar date (T+0). Only dates on
+ * which both traded count; this measures co-movement, not anything tradeable from the morning.
+ */
+export function alignSameDay(y: Series, x: Series): { dates: string[]; y: number[]; x: number[] } {
+  const out = { dates: [] as string[], y: [] as number[], x: [] as number[] };
+  for (const date of [...y.keys()].sort()) {
+    const xv = x.get(date);
+    if (xv === undefined) continue;
+    out.dates.push(date);
+    out.y.push(y.get(date)!);
+    out.x.push(xv);
+  }
+  return out;
+}
+
+/**
  * Pair y(t) with x(the last x-date strictly before t). Markets keep different holidays, so the
  * lag is "previous trading session of the other market", not "index minus one".
  */

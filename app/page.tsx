@@ -7,7 +7,7 @@ import { loadSnapshot } from "./lib/data";
 import { dateLabel, dec, eventLabel, pct, pval } from "./lib/format";
 
 export const metadata: Metadata = {
-  title: "Divergence — sektor IDX yang layak dicek hari ini",
+  title: "Aida — sektor IDX yang layak dicek hari ini",
   description: "Skor perhatian sektor IDX dari keterkaitan struktural dengan SGX, sensitivitas historis, aliran orang dalam, dan pemicu berita.",
 };
 

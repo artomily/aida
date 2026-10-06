@@ -77,6 +77,7 @@ export function buildSnapshot(input: SnapshotInput): Omit<Snapshot, "brief"> {
     validation: {
       significant: [...sensitivity.values()].filter((s) => s.significant).length,
       reverseSignificant: [...sensitivity.values()].filter((s) => s.reverse.significant).length,
+      sameDaySignificant: [...sensitivity.values()].filter((s) => s.sameDay?.significant).length,
       alpha: cfg.alpha,
       window: cfg.window,
       history: { from: dates[0] ?? null, to: dates.at(-1) ?? null, days: dates.length },

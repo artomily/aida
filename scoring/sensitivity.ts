@@ -8,8 +8,11 @@
  * - p-values corrected across the 11 sectors with Benjamini–Hochberg; p_adj > alpha → score 0
  * - stability = share of all rolling windows whose b1 keeps the latest window's sign
  * - the reverse direction (ID → SG) is tested with the same machinery and reported separately
+ * - T+0, the same-day co-movement r_IDX(t) on r_SGX(t), is reported alongside the lagged (T+1)
+ *   test. It shows how tightly the markets move together but cannot be acted on before the IDX
+ *   open, so it never enters the score.
  */
-import { alignLagged, type Series } from "./returns";
+import { alignLagged, alignSameDay, type Series } from "./returns";
 import { SECTORS, type SectorSlug } from "./sectors";
 import { benjaminiHochberg, ols } from "./stats";
 import type { ControlSeries, SensitivityResult } from "./types";
@@ -33,8 +36,14 @@ export type SensitivityInput = {
 
 type Fit = { beta: number; pValue: number; r2: number; n: number; stability: number | null; windows: number };
 
-function design(y: Series, x: Series, controls: Map<ControlSeries, Series>, cfg: SensitivityConfig) {
-  const lagged = alignLagged(y, x);
+function design(
+  y: Series,
+  x: Series,
+  controls: Map<ControlSeries, Series>,
+  cfg: SensitivityConfig,
+  align: typeof alignLagged = alignLagged,
+) {
+  const lagged = align(y, x);
   // Only controls that cover nearly the whole sample; a patchy control would shrink n silently.
   const usable = [...controls].filter(
     ([, s]) => lagged.dates.filter((d) => s.has(d)).length >= cfg.controlCoverage * lagged.dates.length,
@@ -90,18 +99,21 @@ export function sensitivityBySector(
     const fwd = design(y, x, input.controls, cfg);
     // Reverse: the SGX side on the lagged IDX sector, same controls.
     const rev = design(x, y, input.controls, cfg);
+    const same = design(y, x, input.controls, cfg, alignSameDay);
     return {
       slug,
       source: sgx?.source ?? "sti",
       controls: fwd.controls,
       fwd: fit(fwd.y, fwd.xs, cfg),
       rev: fit(rev.y, rev.xs, cfg),
+      same: fit(same.y, same.xs, cfg),
       n: fwd.dates.length,
     };
   });
 
   const adj = benjaminiHochberg(rows.map((r) => r.fwd?.pValue ?? null));
   const revAdj = benjaminiHochberg(rows.map((r) => r.rev?.pValue ?? null));
+  const sameAdj = benjaminiHochberg(rows.map((r) => r.same?.pValue ?? null));
 
   return new Map(
     rows.map((r, i) => {
@@ -125,6 +137,13 @@ export function sensitivityBySector(
           pValue: r.rev?.pValue ?? null,
           pAdjusted: revAdj[i],
           significant: revAdj[i] !== null && revAdj[i]! <= cfg.alpha,
+        },
+        sameDay: {
+          beta: r.same?.beta ?? null,
+          pValue: r.same?.pValue ?? null,
+          pAdjusted: sameAdj[i],
+          r2: r.same?.r2 ?? null,
+          significant: sameAdj[i] !== null && sameAdj[i]! <= cfg.alpha,
         },
       };
       return [r.slug, result];

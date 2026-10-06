@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Divergence — pantau sektor IDX yang bergerak di luar perkiraan",
+  title: "Aida — pantau sektor IDX yang bergerak di luar perkiraan",
   description:
     "Membandingkan gerak tiap sektor IDX dengan perkiraan dari pasar Asia pagi ini. Riset internal, bukan nasihat investasi.",
 };
