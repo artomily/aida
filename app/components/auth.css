@@ -67,6 +67,7 @@
 .au-side {
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
   gap: 28px;
   padding: clamp(24px, 5vh, 56px) clamp(16px, 5vw, 72px);
@@ -75,7 +76,8 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  align-self: flex-start;
+  width: 100%;
+  max-width: 440px;
   color: #fff;
   text-decoration: none;
 }
@@ -256,7 +258,8 @@
   margin-top: 4px;
 }
 .au-back {
-  align-self: flex-start;
+  width: 100%;
+  max-width: 440px;
   font-size: 13px;
   color: var(--au-dim);
   text-decoration: none;
@@ -280,7 +283,9 @@
     justify-content: flex-start;
     gap: 22px;
   }
-  .au-card {
+  .au-card,
+  .au-brand,
+  .au-back {
     max-width: none;
   }
   /* The banner is too short for two lines over the wordmark. */
