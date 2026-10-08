@@ -187,6 +187,50 @@ body:has(.vt-page) {
     inset 0 1px 0 rgba(255, 255, 255, 0.72),
     0 1px 5px rgba(0, 0, 0, 0.34);
 }
+.vt-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  height: 42px;
+  margin-top: 3px;
+  margin-left: clamp(20px, 1.95vw, 29px);
+  font-size: 16px;
+  font-weight: 430;
+  letter-spacing: -0.36px;
+  color: rgba(229, 229, 230, 0.77);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+a.vt-account:hover,
+.vt-account button:hover {
+  color: #fff;
+}
+.vt-account span {
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fff;
+}
+.vt-account button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+/* Narrow desktop: the name would push the Dashboard action off-screen — keep just the verb. */
+@media (max-width: 1279px) {
+  .vt-account {
+    margin-left: 16px;
+  }
+  .vt-account span {
+    display: none;
+  }
+}
 .vt-menu-toggle {
   display: none;
 }
@@ -524,6 +568,13 @@ body:has(.vt-page) {
     width: 100%;
     margin: 0;
     animation: none !important;
+  }
+  .vt-account {
+    margin: 0;
+    padding: 0 4px;
+  }
+  .vt-account span {
+    display: inline;
   }
   .vt-hero-copy br {
     display: none;

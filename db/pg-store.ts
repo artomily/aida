@@ -11,7 +11,7 @@ import type { PgDatabase } from "drizzle-orm/pg-core";
 import type { SectorSlug } from "../scoring/sectors";
 import type { ControlSeries, Market, SensitivityResult, Snapshot } from "../scoring/types";
 import * as t from "./schema";
-import type { JobRun, Store } from "./store";
+import type { JobRun, Store, User } from "./store";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Db = PgDatabase<any, typeof t>;
@@ -268,6 +268,19 @@ export function pgStore(db: Db): Store {
     async listJobRuns(limit) {
       const rows = await db.select().from(t.jobRuns).orderBy(desc(t.jobRuns.startedAt)).limit(limit);
       return rows as JobRun[];
+    },
+
+    async createUser(user) {
+      const rows = await db.insert(t.users).values(user).onConflictDoNothing({ target: t.users.email }).returning({ id: t.users.id });
+      return rows.length > 0;
+    },
+    async getUserByEmail(email) {
+      const [row] = await db.select().from(t.users).where(eq(t.users.email, email)).limit(1);
+      return (row as User | undefined) ?? null;
+    },
+    async getUserById(id) {
+      const [row] = await db.select().from(t.users).where(eq(t.users.id, id)).limit(1);
+      return (row as User | undefined) ?? null;
     },
 
     async getSnapshot(date) {

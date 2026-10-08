@@ -131,3 +131,12 @@ export const jobRuns = pgTable("job_runs", {
   upstreamCalls: integer("upstream_calls").notNull().default(0),
   message: text("message"),
 });
+
+/** Site accounts (email + password). Only the scrypt hash is stored — see app/lib/auth.ts. */
+export const users = pgTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: timestamp("created_at", { mode: "string", withTimezone: true }).notNull().defaultNow(),
+});

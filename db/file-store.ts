@@ -7,7 +7,7 @@ import { mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 
 import path from "node:path";
 import type { SectorSlug } from "../scoring/sectors";
 import type { ControlRow, NewsItem, OwnershipTx, PriceRow, SensitivityResult, Snapshot } from "../scoring/types";
-import type { JobRun, PriceCoverage, Store } from "./store";
+import type { JobRun, PriceCoverage, Store, User } from "./store";
 
 export function fileStore(dir = process.env.AIDA_DATA_DIR ?? path.join(process.cwd(), ".data")): Store {
   const file = (name: string) => path.join(dir, name + ".json");
@@ -113,6 +113,18 @@ export function fileStore(dir = process.env.AIDA_DATA_DIR ?? path.join(process.c
       return read<JobRun[]>("job_runs", [])
         .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
         .slice(0, limit);
+    },
+    async createUser(user) {
+      const users = read<User[]>("users", []);
+      if (users.some((u) => u.email === user.email)) return false;
+      write("users", [...users, user]);
+      return true;
+    },
+    async getUserByEmail(email) {
+      return read<User[]>("users", []).find((u) => u.email === email) ?? null;
+    },
+    async getUserById(id) {
+      return read<User[]>("users", []).find((u) => u.id === id) ?? null;
     },
     async getSnapshot(date) {
       if (date) return read<Snapshot | null>(`snapshots/${date}`, null);

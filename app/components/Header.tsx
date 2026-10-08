@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { logout } from "../lib/auth-actions";
 import { BrandMark, Cta } from "./ui";
 
 export type NavItem = {
@@ -22,10 +23,13 @@ export default function Header({
   items,
   cta,
   onBrand,
+  account,
 }: {
   items: NavItem[];
   cta: { label: string; href?: string; onClick?: () => void };
   onBrand?: () => void;
+  /** Signed-in user (name + Keluar), null for a "Masuk" link, undefined to show neither. */
+  account?: { name: string } | null;
 }) {
   const [open, setOpen] = useState(false);
   const burger = useRef<HTMLButtonElement>(null);
@@ -111,6 +115,17 @@ export default function Header({
         </nav>
 
         <div className="ds-header-end">
+          {account === null && (
+            <Link className="ds-chip ds-account" href="/login" onClick={() => setOpen(false)}>
+              Masuk
+            </Link>
+          )}
+          {account && (
+            <form action={logout} className="ds-chip ds-account">
+              <span title={account.name}>{account.name}</span>
+              <button type="submit">Keluar</button>
+            </form>
+          )}
           <Cta href={cta.href} onClick={cta.onClick ? () => run(cta.onClick) : () => setOpen(false)} passthrough={!cta.onClick}>
             {cta.label}
           </Cta>

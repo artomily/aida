@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { logout } from "../lib/auth-actions";
 import { BrandMark } from "./ui";
 
 const NAV = [
@@ -15,7 +16,7 @@ const NAV = [
  * Landing header. On tablet/phone the nav, snapshot panel and action collapse into a glass
  * dropdown: Escape, an outside pointer or a link click closes it; opening focuses the first link.
  */
-export default function LandingHeader({ stamp }: { stamp: string }) {
+export default function LandingHeader({ stamp, account }: { stamp: string; account: { name: string } | null }) {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const header = useRef<HTMLElement>(null);
@@ -80,6 +81,16 @@ export default function LandingHeader({ stamp }: { stamp: string }) {
           <span className="vt-time-label">Snapshot</span>
           <span className="vt-time-value">{stamp}</span>
         </div>
+        {account ? (
+          <form action={logout} className="vt-account" title={`Masuk sebagai ${account.name}`}>
+            <span title={account.name}>{account.name}</span>
+            <button type="submit">Keluar</button>
+          </form>
+        ) : (
+          <Link className="vt-account" href="/login" onClick={() => setOpen(false)}>
+            Masuk
+          </Link>
+        )}
         <Link className="vt-sign-up" href="/dashboard" onClick={() => setOpen(false)}>
           Dashboard
         </Link>

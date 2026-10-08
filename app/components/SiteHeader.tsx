@@ -1,10 +1,12 @@
+import { getCurrentUser } from "../lib/auth";
 import Header from "./Header";
 import { BookIcon, GridIcon, HomeIcon } from "./ui";
 
-type Page = "board" | "sector" | "methodology";
+type Page = "board" | "sector" | "methodology" | "account";
 
 /** Site navigation — plain links, so every page stays a server component. */
-export default function SiteHeader({ current, sectorHref }: { current: Page; sectorHref?: string }) {
+export default async function SiteHeader({ current, sectorHref }: { current: Page; sectorHref?: string }) {
+  const user = await getCurrentUser();
   return (
     <Header
       items={[
@@ -13,6 +15,7 @@ export default function SiteHeader({ current, sectorHref }: { current: Page; sec
         { label: "Metodologi", icon: <BookIcon />, href: "/methodology", current: current === "methodology", divider: true },
       ]}
       cta={{ label: "Cara membaca skor", href: "/methodology#rumus" }}
+      account={current === "account" ? undefined : user}
     />
   );
 }

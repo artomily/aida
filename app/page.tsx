@@ -10,6 +10,7 @@ import PixelField from "./components/PixelField";
 import { PixelIcon, SegBar, heatLevel, type PixelIconName } from "./components/pixel";
 import { ATTENTION_MAX } from "./components/score";
 import { BACKDROP_VIDEO } from "./components/ui";
+import { getCurrentUser } from "./lib/auth";
 import { loadSnapshot } from "./lib/data";
 import { ago, bare, dateLabel, dec, eventLabel, pct, timeLabel } from "./lib/format";
 import "./landing.css";
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Landing() {
-  const snapshot = await loadSnapshot();
+  const [snapshot, user] = await Promise.all([loadSnapshot(), getCurrentUser()]);
   const stamp = snapshot ? `${timeLabel(snapshot.generatedAt)} WIB  •  ${dateLabel(snapshot.date)}` : "Belum ada snapshot";
 
   return (
@@ -30,7 +31,7 @@ export default async function Landing() {
           <source src={BACKDROP_VIDEO} type="video/mp4" />
         </video>
 
-        <LandingHeader stamp={stamp} />
+        <LandingHeader stamp={stamp} account={user} />
 
         <section className="vt-hero">
           <div className="vt-hero-content">

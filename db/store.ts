@@ -39,6 +39,8 @@ export type JobRun = {
   message: string | null;
 };
 
+export type User = { id: string; email: string; name: string; passwordHash: string; createdAt: string };
+
 export type PriceCoverage = { symbol: string; market: "IDX" | "SGX"; first: string; last: string; rows: number };
 
 export interface Store {
@@ -68,6 +70,10 @@ export interface Store {
   getSnapshot(date?: string): Promise<Snapshot | null>;
   putJobRun(run: JobRun): Promise<void>;
   listJobRuns(limit: number): Promise<JobRun[]>;
+  /** Insert a new account; false when the (lower-cased) email is already taken. */
+  createUser(user: User): Promise<boolean>;
+  getUserByEmail(email: string): Promise<User | null>;
+  getUserById(id: string): Promise<User | null>;
 }
 
 /*

@@ -845,6 +845,13 @@ button:focus-visible,
     width: 100%;
     justify-content: space-between;
   }
+  .ds-menu .ds-header-end {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ds-menu .ds-account {
+    padding: 0 6px;
+  }
   .ds-hero {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1705,4 +1712,47 @@ button:focus-visible,
   margin-top: 12px;
   font-size: 12.5px;
   color: var(--muted);
+}
+
+/* Account: header sign-in / sign-out and the /login · /register forms. */
+.ds-account {
+  color: var(--nav-ink);
+}
+a.ds-account:hover,
+.ds-account button:hover {
+  color: var(--ink);
+}
+.ds-account span {
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-account button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted2);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ds-account :focus-visible,
+a.ds-account:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.dv-hint {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+.dv-hint a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.dv-form label:not(:first-of-type) {
+  margin-top: 6px;
 }
