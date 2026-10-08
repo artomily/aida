@@ -1,10 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Pixel } from "next/font/google";
 import "./globals.css";
 
 // Stand-in for Reference Sans: variable (100–900), so in-between weights like 430 and 460 resolve.
 const sans = Geist({
   variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+// LED-board accents on the landing page: eyebrows, numerals, the ticker.
+const pixel = Geist_Pixel({
+  variable: "--font-pixel",
   subsets: ["latin"],
 });
 
@@ -21,7 +27,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="id" className={`${sans.variable} h-full antialiased`}>
+    <html lang="id" className={`${sans.variable} ${pixel.variable} h-full antialiased`}>
       <body className="min-h-full">{children}</body>
     </html>
   );

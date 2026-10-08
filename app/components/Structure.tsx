@@ -62,8 +62,12 @@ export function SubsectorCard({ structure }: { structure?: SectorStructure }) {
 /** Dashboard: all 11 sectors with their sub-sectors as chips. */
 export function SectorsPanel({ snapshot }: { snapshot: Snapshot }) {
   const st = snapshot.structure;
+  const total = Object.values(st ?? {}).reduce(
+    (t, sec) => (sec ? { companies: t.companies + sec.companies, cap: t.cap + sec.marketCap, subs: t.subs + sec.subsectors.length } : t),
+    { companies: 0, cap: 0, subs: 0 },
+  );
   return (
-    <section className="tm-panel" style={{ marginTop: 12 }}>
+    <section className="tm-panel tm-sectors">
       <header className="tm-panel-head">
         <h2>Sektor & subsektor</h2>
         <span className="tm-panel-right">IDX-IC</span>
@@ -91,6 +95,18 @@ export function SectorsPanel({ snapshot }: { snapshot: Snapshot }) {
               </Link>
             );
           })}
+          {/* Twelfth tile: keeps the 11 sectors on an even grid at 4, 3 and 2 columns. */}
+          <div className="st-sector st-total">
+            <header>
+              <b>Total IDX</b>
+              <span className="tnum">{total.companies} emiten</span>
+            </header>
+            <span className="st-meta tnum">{idr(total.cap)}</span>
+            <span className="st-total-note">
+              {total.subs} subsektor di {snapshot.sectors.length} sektor IDX-IC. Klik sektor untuk melihat emiten terbesar per
+              subsektor.
+            </span>
+          </div>
         </div>
       ) : (
         <p className="st-empty">{MISSING}</p>

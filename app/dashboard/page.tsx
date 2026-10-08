@@ -58,73 +58,76 @@ function Terminal({ snapshot }: { snapshot: Snapshot }) {
         <Kpi label="Riwayat" value={`${v.history.days} hr`} sub={`jendela ${v.window} hari`} />
       </section>
 
-      <div className="tm-grid">
-        <section className="tm-panel tm-rank">
-          <PanelHead title="Peringkat sektor" right={<Link href="/methodology#rumus">Rumus ↗</Link>} />
-          <div className="tm-table-wrap">
-            <table className="tm-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th className="l">Sektor</th>
-                  <th className="l">Perhatian</th>
-                  <th>Eksposur</th>
-                  <th>β SGX</th>
-                  <th>p adj</th>
-                  <th>Flow 30h</th>
-                  <th className="l">Pemicu</th>
-                  <th>Korelasi 60h</th>
-                </tr>
-              </thead>
-              <tbody>
-                {snapshot.sectors.map((s) => (
-                  <Row key={s.slug} s={s} />
-                ))}
-              </tbody>
-            </table>
+      <section className="tm-panel tm-rank">
+        <PanelHead title="Peringkat sektor" right={<Link href="/methodology#rumus">Rumus ↗</Link>} />
+        <div className="tm-table-wrap">
+          <table className="tm-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th className="l">Sektor</th>
+                <th className="l">Perhatian</th>
+                <th>Eksposur</th>
+                <th>β SGX</th>
+                <th>p adj</th>
+                <th>Flow 30h</th>
+                <th className="l">Pemicu</th>
+                <th>Korelasi 60h</th>
+              </tr>
+            </thead>
+            <tbody>
+              {snapshot.sectors.map((s) => (
+                <Row key={s.slug} s={s} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div className="tm-row">
+        <section className="tm-panel tm-heat-panel">
+          <PanelHead title="Peta perhatian" right={<span>0 – {dec(ATTENTION_MAX, 1)}</span>} />
+          <div className="tm-heat">
+            {snapshot.sectors.map((s) => (
+              <Link
+                key={s.slug}
+                href={`/sector/${s.slug}`}
+                className={`tm-tile${s.rank === 1 ? " tm-tile--lead" : ""}`}
+                style={{ background: heat(s.attention) }}
+              >
+                <span>{s.name}</span>
+                <b className="tnum">{dec(s.attention)}</b>
+              </Link>
+            ))}
           </div>
         </section>
 
-        <aside className="tm-side">
-          <section className="tm-panel">
-            <PanelHead title="Peta perhatian" right={<span>0 – {dec(ATTENTION_MAX, 1)}</span>} />
-            <div className="tm-heat">
-              {snapshot.sectors.map((s) => (
-                <Link key={s.slug} href={`/sector/${s.slug}`} className="tm-tile" style={{ background: heat(s.attention) }}>
-                  <span>{s.name}</span>
-                  <b className="tnum">{dec(s.attention)}</b>
-                </Link>
+        <section className="tm-panel">
+          <PanelHead title="Pemicu terbaru" right={<span>{events.length}</span>} />
+          {events.length ? (
+            <ul className="tm-feed">
+              {events.slice(0, 8).map((e) => (
+                <li key={`${e.sector.slug}-${e.newsId}`}>
+                  <span className="tm-feed-time tnum">{timeLabel(e.publishedAt)}</span>
+                  <span className="tm-feed-body">
+                    <span className={`tm-tag tm-tag--${e.direction > 0 ? "pos" : e.direction < 0 ? "neg" : "flat"}`}>{eventLabel(e.type)}</span>
+                    <span className="tm-feed-entity">{e.entity}</span>
+                    <Link href={`/sector/${e.sector.slug}`} className="tm-feed-sector">
+                      {e.sector.name}
+                    </Link>
+                  </span>
+                </li>
               ))}
-            </div>
-          </section>
+            </ul>
+          ) : (
+            <p className="tm-empty">Tidak ada pemicu dalam 3 hari terakhir.</p>
+          )}
+        </section>
 
-          <section className="tm-panel">
-            <PanelHead title="Pemicu terbaru" right={<span>{events.length}</span>} />
-            {events.length ? (
-              <ul className="tm-feed">
-                {events.slice(0, 8).map((e) => (
-                  <li key={`${e.sector.slug}-${e.newsId}`}>
-                    <span className="tm-feed-time tnum">{timeLabel(e.publishedAt)}</span>
-                    <span className="tm-feed-body">
-                      <span className={`tm-tag tm-tag--${e.direction > 0 ? "pos" : e.direction < 0 ? "neg" : "flat"}`}>{eventLabel(e.type)}</span>
-                      <span className="tm-feed-entity">{e.entity}</span>
-                      <Link href={`/sector/${e.sector.slug}`} className="tm-feed-sector">
-                        {e.sector.name}
-                      </Link>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="tm-empty">Tidak ada pemicu dalam 3 hari terakhir.</p>
-            )}
-          </section>
-
-          <section className="tm-panel">
-            <PanelHead title="Ringkasan pagi" right={<span>{snapshot.brief.by === "llm" ? "LLM" : "otomatis"}</span>} />
-            <p className="tm-brief">{snapshot.brief.text}</p>
-          </section>
-        </aside>
+        <section className="tm-panel">
+          <PanelHead title="Ringkasan pagi" right={<span>{snapshot.brief.by === "llm" ? "LLM" : "otomatis"}</span>} />
+          <p className="tm-brief">{snapshot.brief.text}</p>
+        </section>
       </div>
 
       <SectorsPanel snapshot={snapshot} />

@@ -81,24 +81,28 @@
   color: var(--dim);
 }
 
-/* ── panels ── */
-.tm-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 12px;
-  align-items: start;
-}
-.tm-side {
-  display: grid;
-  gap: 12px;
-}
+/* ── panels: full-width table, then three equal-height panels, then sectors ── */
 .tm-panel {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--hair);
   border-radius: 8px;
   background: var(--surface);
   overflow: hidden;
+  min-width: 0;
+}
+.tm-rank,
+.tm-row {
+  margin-bottom: 12px;
+}
+.tm-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
 }
 .tm-panel-head {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -230,31 +234,40 @@
   background: rgb(255 255 255 / 0.07);
 }
 
-/* ── heatmap ── */
+/* ── heatmap: the leader spans two columns, so 11 tiles fill a 3 × 4 grid exactly ── */
 .tm-heat {
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3px;
-  padding: 10px;
+  grid-auto-rows: minmax(64px, 1fr);
+  gap: 4px;
+  padding: 12px;
 }
 .tm-tile {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 6px;
-  min-height: 58px;
-  padding: 8px 9px;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 10px;
   border-radius: 4px;
   color: #fff;
   text-decoration: none;
   transition: filter 0.15s;
 }
+.tm-tile--lead {
+  grid-column: span 2;
+}
 .tm-tile:hover {
   filter: brightness(1.2);
 }
 .tm-tile span {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   font-size: 11.5px;
-  line-height: 1.2;
+  line-height: 1.25;
   opacity: 0.9;
 }
 .tm-tile b {
@@ -272,7 +285,7 @@
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr);
   gap: 10px;
-  padding: 9px 14px;
+  padding: 10px 14px;
   font-size: 12.5px;
   border-bottom: 1px solid rgb(255 255 255 / 0.05);
 }
@@ -314,11 +327,22 @@
 }
 
 @media (max-width: 1100px) {
-  .tm-grid {
+  .tm-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tm-heat-panel {
+    grid-column: 1 / -1;
+  }
+  .tm-heat {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 720px) {
+  .tm-row {
     grid-template-columns: minmax(0, 1fr);
   }
-  .tm-side {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  .tm-heat {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 @media (max-width: 720px) {
