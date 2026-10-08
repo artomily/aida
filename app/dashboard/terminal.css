@@ -223,11 +223,11 @@
 }
 .tm-tag--pos {
   color: var(--pos);
-  background: rgb(127 178 226 / 0.12);
+  background: rgb(95 211 141 / 0.13);
 }
 .tm-tag--neg {
   color: var(--neg);
-  background: rgb(228 132 102 / 0.12);
+  background: rgb(245 148 58 / 0.14);
 }
 .tm-tag--flat {
   color: var(--ink-soft);

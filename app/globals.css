@@ -23,9 +23,9 @@
   --hair: #2c3436;
   --slash: #4b5557;
 
-  /* Residual polarity — blue above the model, terracotta below. Always paired with ▲/▼. */
-  --pos: #7fb2e2;
-  --neg: #e48466;
+  /* Residual polarity — green above the model, orange below. Always paired with ▲/▼. */
+  --pos: #5fd38d;
+  --neg: #f5943a;
 
   --ease-glass: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -41,9 +41,9 @@
   --surface: #222c2f;
   --dim: #7d8587;
   --focus: #ffffff;
-  --area-pos: rgba(127, 178, 226, 0.16);
-  --area-neg: rgba(228, 132, 102, 0.14);
-  --alert-tint: rgba(228, 132, 102, 0.1);
+  --area-pos: rgba(95, 211, 141, 0.16);
+  --area-neg: rgba(245, 148, 58, 0.14);
+  --alert-tint: rgba(245, 148, 58, 0.1);
   --bad-bg: #3a1d1a;
   --bad-ink: #f0a494;
   --info-bg: #17282d;
