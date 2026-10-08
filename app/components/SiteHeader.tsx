@@ -2,7 +2,7 @@ import { getCurrentUser } from "../lib/auth";
 import Header from "./Header";
 import { BookIcon, GridIcon, HomeIcon } from "./ui";
 
-type Page = "board" | "sector" | "methodology" | "account";
+type Page = "board" | "sector" | "methodology";
 
 /** Site navigation — plain links, so every page stays a server component. */
 export default async function SiteHeader({ current, sectorHref }: { current: Page; sectorHref?: string }) {
@@ -15,7 +15,7 @@ export default async function SiteHeader({ current, sectorHref }: { current: Pag
         { label: "Metodologi", icon: <BookIcon />, href: "/methodology", current: current === "methodology", divider: true },
       ]}
       cta={{ label: "Cara membaca skor", href: "/methodology#rumus" }}
-      account={current === "account" ? undefined : user}
+      account={user}
     />
   );
 }

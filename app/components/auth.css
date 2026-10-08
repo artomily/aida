@@ -1,0 +1,300 @@
+/*
+ * /login and /register — the landing's LED-board face (app/landing.css `px-*`): Geist Pixel
+ * throughout, ember/amber on black, corner-bracket frame, a live PixelField beside the form.
+ */
+.au-page {
+  --au-ember: #ff5a1f;
+  --au-amber: #ffb35c;
+  --au-line: rgba(255, 255, 255, 0.12);
+  --au-text: rgba(236, 232, 226, 0.86);
+  --au-dim: rgba(236, 232, 226, 0.52);
+  --au-error: #ff7a52;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  min-height: 100svh;
+  background: #000;
+  color: #fff;
+}
+.au-page,
+.au-page :where(*) {
+  font-family: var(--font-pixel), ui-monospace, monospace;
+}
+
+/* ── LED panel ── */
+.au-led {
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid var(--au-line);
+  background: #000;
+}
+.au-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.au-led::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.85) 100%);
+}
+.au-led-copy {
+  position: absolute;
+  z-index: 1;
+  left: clamp(24px, 4vw, 56px);
+  right: clamp(24px, 4vw, 56px);
+  bottom: clamp(24px, 5vh, 48px);
+}
+.au-label {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--au-dim);
+}
+.au-led-line {
+  margin: 0;
+  font-size: clamp(22px, 2.4vw, 32px);
+  color: var(--au-amber);
+  text-shadow: 0 0 18px rgba(255, 90, 31, 0.55);
+}
+
+/* ── form side ── */
+.au-side {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  padding: clamp(24px, 5vh, 56px) clamp(16px, 5vw, 72px);
+}
+.au-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  color: #fff;
+  text-decoration: none;
+}
+.au-brand svg {
+  width: 32px;
+  height: 32px;
+}
+.au-brand b {
+  font-size: 18px;
+  font-weight: 400;
+}
+.au-card {
+  width: 100%;
+  max-width: 440px;
+  padding: clamp(22px, 3vw, 32px);
+  border: 1px solid var(--au-line);
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 3px),
+    #070302;
+}
+
+/* corner brackets: four pixel L-shapes, as on the landing board */
+.au-frame {
+  position: relative;
+}
+.au-frame::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  --c: var(--au-amber);
+  --l: 12px;
+  --w: 2px;
+  background:
+    linear-gradient(var(--c) 0 0) left top / var(--l) var(--w),
+    linear-gradient(var(--c) 0 0) left top / var(--w) var(--l),
+    linear-gradient(var(--c) 0 0) right top / var(--l) var(--w),
+    linear-gradient(var(--c) 0 0) right top / var(--w) var(--l),
+    linear-gradient(var(--c) 0 0) left bottom / var(--l) var(--w),
+    linear-gradient(var(--c) 0 0) left bottom / var(--w) var(--l),
+    linear-gradient(var(--c) 0 0) right bottom / var(--l) var(--w),
+    linear-gradient(var(--c) 0 0) right bottom / var(--w) var(--l);
+  background-repeat: no-repeat;
+  opacity: 0.85;
+}
+.au-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--au-dim);
+}
+.au-num {
+  padding: 3px 7px 2px;
+  background: var(--au-amber);
+  color: #1a0700;
+  box-shadow: 0 0 14px rgba(255, 90, 31, 0.5);
+}
+.au-eyebrow i {
+  width: 36px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--au-amber) 0 2px, transparent 2px 4px);
+}
+.au-title {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+}
+.au-lead {
+  margin: 12px 0 24px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--au-text);
+}
+
+.au-form {
+  display: grid;
+  gap: 16px;
+}
+.au-field {
+  display: grid;
+  gap: 8px;
+}
+.au-field label {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--au-dim);
+}
+.au-field input {
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 2px;
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  caret-color: var(--au-amber);
+}
+.au-field input:hover {
+  border-color: rgba(255, 255, 255, 0.36);
+}
+.au-field input:focus-visible {
+  outline: none;
+  border-color: var(--au-amber);
+  box-shadow: 0 0 0 1px var(--au-amber), 0 0 18px rgba(255, 90, 31, 0.35);
+}
+.au-hint {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--au-dim);
+}
+.au-hint a {
+  color: var(--au-amber);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 179, 92, 0.45);
+}
+.au-hint a:hover {
+  color: #fff;
+}
+.au-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 2px solid var(--au-error);
+  background: rgba(255, 90, 31, 0.08);
+  font-size: 13px;
+  color: var(--au-error);
+}
+.au-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  justify-self: start;
+  min-width: 160px;
+  height: 44px;
+  margin-top: 4px;
+  padding: 0 5px 0 16px;
+  border: 0;
+  border-radius: 7px;
+  background: #fff;
+  color: #111;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.38), 0 0 24px rgba(255, 90, 31, 0.18);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.au-btn:hover {
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.38), 0 0 30px rgba(255, 90, 31, 0.4);
+}
+.au-btn:focus-visible {
+  outline: 2px solid var(--au-amber);
+  outline-offset: 3px;
+}
+.au-btn:disabled {
+  cursor: progress;
+  opacity: 0.75;
+}
+.au-btn-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 32px;
+  border-radius: 7px;
+  background: #070909;
+}
+.au-btn-box svg {
+  width: 14px;
+  height: 14px;
+}
+.au-switch {
+  margin-top: 4px;
+}
+.au-back {
+  align-self: flex-start;
+  font-size: 13px;
+  color: var(--au-dim);
+  text-decoration: none;
+}
+.au-back:hover {
+  color: #fff;
+}
+
+/* tablet & phone: the mosaic becomes a short banner above the form */
+@media (max-width: 860px) {
+  .au-page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+  .au-led {
+    height: clamp(150px, 26svh, 240px);
+    border-right: 0;
+    border-bottom: 1px solid var(--au-line);
+  }
+  .au-side {
+    justify-content: flex-start;
+    gap: 22px;
+  }
+  .au-card {
+    max-width: none;
+  }
+  /* The banner is too short for two lines over the wordmark. */
+  .au-label {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .au-led-copy {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+  }
+  .au-btn {
+    width: 100%;
+  }
+}

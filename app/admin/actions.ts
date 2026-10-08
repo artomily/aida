@@ -8,8 +8,8 @@ import { context } from "../../jobs/context";
 import { runDaily } from "../../jobs/daily";
 import { recorded } from "../../jobs/runlog";
 import { runWeeklyBeta } from "../../jobs/weekly-beta";
-import { requireAdmin } from "../lib/admin";
-import { ADMIN_COOKIE, SESSION_HOURS, passwordMatches, signSession } from "../lib/admin-token";
+import { requireAdmin, startAdminSession } from "../lib/admin";
+import { ADMIN_COOKIE, passwordMatches } from "../lib/admin-token";
 
 export type LoginState = { error?: string };
 
@@ -20,13 +20,7 @@ export async function login(_: LoginState, form: FormData): Promise<LoginState> 
     await new Promise((r) => setTimeout(r, 800));
     return { error: "Kata sandi salah." };
   }
-  (await cookies()).set(ADMIN_COOKIE, signSession()!, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_HOURS * 3600,
-  });
+  await startAdminSession();
   redirect("/admin");
 }
 

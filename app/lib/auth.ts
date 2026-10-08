@@ -1,5 +1,5 @@
 import "server-only";
-import { createHmac, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -30,6 +30,31 @@ export async function verifyPassword(password: string, stored: string): Promise<
   const want = Buffer.from(hash, "base64url");
   const got = await scryptAsync(password, Buffer.from(salt, "base64url"), want.length);
   return timingSafeEqual(want, got);
+}
+
+/**
+ * Accounts defined in the environment: the admin (ADMIN_EMAIL + ADMIN_PASSWORD, which also
+ * opens /admin) and an example user (DEMO_USER_*). They sign in without registering; the
+ * users row is created on first login.
+ */
+export type EnvAccount = { email: string; password: string; name: string; admin: boolean };
+
+export function envAccounts(): EnvAccount[] {
+  const e = process.env;
+  const out: EnvAccount[] = [];
+  if (e.ADMIN_EMAIL && e.ADMIN_PASSWORD)
+    out.push({ email: e.ADMIN_EMAIL.trim().toLowerCase(), password: e.ADMIN_PASSWORD, name: e.ADMIN_NAME || "Admin", admin: true });
+  if (e.DEMO_USER_EMAIL && e.DEMO_USER_PASSWORD)
+    out.push({ email: e.DEMO_USER_EMAIL.trim().toLowerCase(), password: e.DEMO_USER_PASSWORD, name: e.DEMO_USER_NAME || "User A", admin: false });
+  return out;
+}
+
+const digest = (s: string) => createHash("sha256").update(s).digest();
+
+/** The env account these credentials belong to, compared in constant time. */
+export function matchEnvAccount(email: string, password: string): EnvAccount | null {
+  const account = envAccounts().find((a) => a.email === email);
+  return account && timingSafeEqual(digest(password), digest(account.password)) ? account : null;
 }
 
 /** A fixed dev secret keeps `next dev` usable without setup; production must set AUTH_SECRET. */

@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/brand/aida-logo-white.png">
+    <img src="public/brand/aida-logo-dark.png" alt="Aida logo" width="96">
+  </picture>
+</p>
+
 # Aida
 
 **Sector attention scoring for IDX, driven by Singapore market linkage.**
@@ -8,8 +15,48 @@ Sectors Hackathon 2026 · Track 3 · Market Intelligence
 
 ## Problem Statement
 
-Indonesian investors react to Singapore-linked corporate events hours after they become
-public, because no tool connects SGX activity to the IDX sectors it structurally touches.
+Aida helps IDX investors and analysts decide which sector to check first each morning by
+connecting SGX price moves, Singapore corporate news, and insider transactions to the IDX
+sectors structurally linked to them — signals that are otherwise scattered and rarely tied
+together before the market opens.
+
+---
+
+## How It Works
+
+```mermaid
+flowchart LR
+    subgraph SRC["Signals (sectors.app, end of day)"]
+        SGX["SGX closes<br/>+ STI"]
+        NEWS["Singapore<br/>financial news"]
+        OWN["IDX insider &<br/>institutional filings"]
+        IDX["IDX closes"]
+    end
+
+    GRAPH[("exposure_graph.yaml<br/>SGX ↔ IDX links")]
+
+    subgraph SCORE["scoring/ — pure functions"]
+        E["Exposure"]
+        S["Sensitivity<br/>|β| × stability"]
+        F["Flow"]
+        T["Trigger"]
+        A{{"Attention per sector"}}
+    end
+
+    SGX --> S
+    IDX --> S
+    GRAPH --> E
+    GRAPH --> T
+    NEWS --> T
+    OWN --> F
+    E & S & F & T --> A
+    A --> SNAP[("daily_snapshot")]
+    SNAP --> UI["Dashboard · sector pages · /api/snapshot"]
+```
+
+Every weekday before 06:00 WIB the pipeline turns the previous session's data into one
+snapshot row: an attention score for each of 11 IDX sectors, with every component kept
+visible so a reader can see *why* a sector ranks where it does.
 
 ---
 
@@ -46,6 +93,15 @@ Trigger     = event intensity from news         # daily, rule-based
 
 Attention   = Base x (0.5 + Sensitivity) x (1 + Flow + Trigger)
 Confidence  = rolling 60d correlation           # shown separately, never folded in
+```
+
+```mermaid
+flowchart LR
+    B["Base<br/>Exposure 0–1"] --> M(("×"))
+    SEN["0.5 + Sensitivity<br/>0.5–1.5"] --> M
+    FT["1 + Flow + Trigger<br/>1–3"] --> M
+    M --> ATT["Attention<br/>0–4.5"]
+    CONF["Confidence<br/>rolling 60d correlation"] -.->|"shown beside,<br/>never multiplied in"| ATT
 ```
 
 Multiplicative structure means a sector needs **all three conditions** to rank high: it must
@@ -149,15 +205,35 @@ hypotheses would surface false positives by chance alone.
 Single morning fetch, persisted, served to all users from our own API. The upstream data
 provider is hit once per day regardless of traffic.
 
-```
-05:00 WIB  cron (Mon–Fri)  ->  pipeline: SGX closes + STI
-                               -> SGX news + IDX ownership filings
-                               -> IDX closes -> scores -> daily snapshot   (ready by 06:00)
-04:00 WIB  cron (Mon)      ->  refresh universe, re-estimate beta across all sectors
-admin      /admin          ->  backfill, re-runs, data checks, raw-input inspection
+```mermaid
+flowchart TB
+    subgraph CRON["Vercel Cron (CRON_SECRET)"]
+        P["05:00 WIB Mon–Fri<br/>/api/cron/pipeline"]
+        W["04:00 WIB Mon<br/>/api/cron/weekly"]
+    end
+    ADMIN["/admin<br/>backfill · re-runs · data checks"]
 
-client -> our API -> Neon Postgres (daily_snapshot)    [upstream never touched on read]
+    subgraph JOBS["jobs/"]
+        D["daily: SGX closes + STI → SGX news + IDX filings<br/>→ IDX closes → scores → snapshot"]
+        WB["weekly-beta: refresh universe,<br/>re-estimate β for all sectors"]
+        BF["backfill: 3y history,<br/>resumable slices"]
+    end
+
+    CLIENT["ingest/client.ts<br/>cache · hourly & daily caps · pacing"]
+    API[("sectors.app API")]
+    DB[("Neon Postgres<br/>(.data/ JSON locally)")]
+
+    P --> D
+    W --> WB
+    ADMIN --> D & WB & BF
+    D & WB & BF --> CLIENT --> API
+    D & WB & BF --> DB
+
+    USER["Browser"] --> APP["Next.js pages & /api/*"] -->|"one row per page load"| DB
 ```
+
+Upstream is never touched on read: the snapshot is ready by 06:00 WIB and every visitor is
+served from our own database.
 
 Users get the day's snapshot before the IDX open without anyone running anything. sectors.app
 prices are end-of-day, so the snapshot scores the previous session; there is no intraday
@@ -177,8 +253,48 @@ feed upstream. Vercel Hobby fires a cron anywhere within its hour, hence 05:00�
   weekly beta; every run is logged in `job_runs` with its upstream call count
 
 Dashboard pages read a single pre-computed snapshot row per day. Page loads cost zero
-upstream calls. Crons are `vercel.json` → `/api/cron/{sgx,news,score,weekly}`, guarded by
-`Authorization: Bearer $CRON_SECRET`.
+upstream calls. Crons are `vercel.json` → `/api/cron/{pipeline,weekly}`, guarded by
+`Authorization: Bearer $CRON_SECRET`; single stages (`sgx`, `news`, `score`) run from
+`/admin` or the CLI.
+
+### Accounts
+
+The landing page, methodology and sector pages are public; **the dashboard requires an
+account**. Every "Dashboard" link sends a signed-out visitor to `/login?next=/dashboard` and
+back again after signing in.
+
+```mermaid
+sequenceDiagram
+    actor V as Visitor
+    participant D as /dashboard
+    participant L as /login · /register
+    participant A as auth-actions.ts
+    participant S as users table
+
+    V->>D: click "Dashboard"
+    D-->>V: no session → redirect /login?next=/dashboard
+    V->>L: email + password
+    L->>A: server action
+    alt ADMIN_EMAIL / DEMO_USER_EMAIL from env
+        A->>S: create row on first login
+        A-->>V: user cookie (+ admin cookie for ADMIN_EMAIL)
+    else registered account
+        A->>S: look up email, verify scrypt hash
+        A-->>V: user cookie
+    end
+    V->>D: redirect back to /dashboard
+```
+
+- **Register / login** at `/register` and `/login`: name, email, password (min. 8 chars).
+  Passwords are stored as scrypt hashes; the session is a stateless `<userId>.<expiry>.<hmac>`
+  httpOnly cookie signed with `AUTH_SECRET`, valid 30 days. Wrong email and wrong password
+  return the same message after the same delay.
+- **Env accounts** sign in without registering: the admin (`ADMIN_EMAIL` + `ADMIN_PASSWORD`,
+  which also opens `/admin`) and an example user (`DEMO_USER_*`). Their emails cannot be
+  claimed through `/register`.
+- **Keluar** (sign out) clears both the user and the admin session.
+- `/admin/login` still accepts `ADMIN_PASSWORD` alone, for operating the pipeline without a
+  user account.
 
 ### Note on redistribution
 
@@ -195,15 +311,22 @@ A single Next.js package; the module boundaries follow the plan without a worksp
 
 ```
 aida/
-├── app/                          # Next.js dashboard (server components)
-│   ├── page.tsx                  # sector ranking board
+├── app/                          # Next.js app (server components)
+│   ├── page.tsx                  # landing: LED-board hero, live ranking preview
+│   ├── dashboard/                # sector ranking board (sign-in required)
 │   ├── sector/[slug]/            # score breakdown + linked entities
 │   ├── methodology/              # regression results, validation, limitations
-│   └── api/
-│       ├── snapshot/             # today's scores (reads DB only)
-│       ├── sector/[slug]/
-│       └── cron/[job]/           # pipeline + weekly, CRON_SECRET-guarded
+│   ├── login/ · register/        # account pages (pixel theme, components/AuthPage.tsx)
 │   ├── admin/                    # password-gated monitoring and job runs
+│   ├── api/
+│   │   ├── snapshot/             # today's scores (reads DB only)
+│   │   ├── sector/[slug]/
+│   │   └── cron/[job]/           # pipeline + weekly, CRON_SECRET-guarded
+│   ├── lib/
+│   │   ├── auth.ts               # password hashing, user session, env accounts
+│   │   ├── auth-actions.ts       # register / login / logout server actions
+│   │   └── admin*.ts             # admin session
+│   └── icon.svg · favicon.ico · apple-icon.png   # generated from the logo
 │
 ├── db/
 │   ├── schema.ts                 # Drizzle schema
@@ -247,9 +370,11 @@ aida/
 │   ├── 01_leadlag_validation.ts  # RUN THIS FIRST
 │   └── 02_out_of_sample.ts
 │
-└── scripts/
-    ├── sectors-mock.mjs          # local sectors.app stand-in, counts calls
-    └── db-check.ts               # Postgres store round-trip on PGlite
+├── scripts/
+│   ├── sectors-mock.mjs          # local sectors.app stand-in, counts calls
+│   └── db-check.ts               # Postgres store round-trip on PGlite
+│
+└── public/brand/                 # logo PNGs (white, dark, app icon) at 1024 px
 ```
 
 The research files are TypeScript scripts rather than notebooks so they run on the exact
@@ -259,26 +384,124 @@ scoring code the dashboard uses.
 
 ## Database Schema
 
-```sql
-sectors           (slug PK, name, gics_mapping, exposure_score)
-companies         (symbol PK, name, market, sector_slug, market_cap, updated_at)
-relationships     (id PK, sgx_entity, idx_symbol, sector_slug, relation_type, weight, via, source, verified)
+```mermaid
+erDiagram
+    sectors ||--o{ companies : "sector_slug"
+    sectors ||--o{ relationships : "sector_slug"
+    companies ||--o{ prices_daily : "symbol"
+    companies ||--o{ ownership_tx : "symbol"
+    sectors ||--o{ sector_index : "sector_slug"
+    news_raw ||--o{ news_events : "news_id"
+    sectors ||--o{ news_events : "sector_slug"
+    sectors ||--o{ beta_estimates : "sector_slug"
 
-prices_daily      (date, symbol, market, close, return)     -- PK (date, symbol)
-sector_index      (date, sector_slug, market, return)       -- PK (date, sector_slug, market)
-controls_daily    (date PK, spx_fut, usdidr, hsi, coal, cpo)
-
-news_raw          (id PK, published_at, title, body, symbols, url)   -- internal only
-news_events       (id PK, news_id, published_at, sgx_entity, sector_slug, event_type, direction, materiality)
-ownership_tx      (id PK, date, symbol, sector_slug, holder_name, holder_type, tx_type, value, pct_change, tags)
-
-beta_estimates    (sector_slug, as_of, result JSONB, beta, p_value, p_adjusted, stability, r2)
-daily_snapshot    (date PK, payload JSONB)                  -- what the dashboard reads
-job_runs          (id PK, job, trigger, started_at, finished_at, status, upstream_calls, message)
+    sectors {
+        text slug PK
+        text name
+        text gics_mapping
+        float exposure_score
+    }
+    companies {
+        text symbol PK
+        text name
+        text market
+        text sector_slug
+        text sub_sector
+        float market_cap
+        timestamptz updated_at
+    }
+    relationships {
+        text id PK
+        text sgx_entity
+        text idx_symbol
+        text sector_slug
+        text relation_type
+        float weight
+        text via
+        text source
+        bool verified
+    }
+    prices_daily {
+        date date PK
+        text symbol PK
+        text market
+        float close
+        float return
+    }
+    sector_index {
+        date date PK
+        text sector_slug PK
+        text market PK
+        float return
+    }
+    controls_daily {
+        date date PK
+        float spx_fut
+        float usdidr
+        float hsi
+        float coal
+        float cpo
+    }
+    news_raw {
+        text id PK
+        timestamptz published_at
+        text title
+        text body "internal only"
+        jsonb symbols
+        text url
+    }
+    news_events {
+        text id PK
+        text news_id
+        text sgx_entity
+        text sector_slug
+        text event_type
+        int direction
+        float materiality
+    }
+    ownership_tx {
+        text id PK
+        timestamptz date
+        text symbol
+        text holder_name
+        text holder_type
+        text tx_type
+        float value
+        jsonb tags
+    }
+    beta_estimates {
+        text sector_slug PK
+        date as_of PK
+        jsonb result
+        float beta
+        float p_adjusted
+        float stability
+    }
+    daily_snapshot {
+        date date PK
+        jsonb payload "what the dashboard reads"
+    }
+    job_runs {
+        text id PK
+        text job
+        text trigger
+        text status
+        int upstream_calls
+        text message
+    }
+    users {
+        text id PK
+        text email UK
+        text name
+        text password_hash "scrypt"
+        timestamptz created_at
+    }
 ```
 
-`daily_snapshot` stores the entire computed day as one row. The dashboard performs exactly
-one query.
+Relationships are logical (joined in code); the tables carry no foreign keys, so ingest can
+write any table in any order. `daily_snapshot` stores the entire computed day as one row —
+the dashboard performs exactly one query. `users` holds site accounts (migration
+`0003_users`).
 
 ---
 
@@ -286,9 +509,9 @@ one query.
 
 ```bash
 npm install
-cp .env.example .env        # SECTORS_API_KEY, ADMIN_PASSWORD, CRON_SECRET
+cp .env.example .env        # SECTORS_API_KEY, ADMIN_*, DEMO_USER_*, AUTH_SECRET, CRON_SECRET
 neon link --project-id <id> --branch production -y   # pulls DATABASE_URL into .env
-npm run db:migrate
+npm run db:migrate          # includes the users table
 npm run dev                 # then /admin → Rencana backfill → Jalankan backfill
 npm run research:leadlag    # validate before trusting the Sensitivity column
 ```
@@ -296,6 +519,12 @@ npm run research:leadlag    # validate before trusting the Sensitivity column
 The backfill can also run from the CLI (`npm run ingest:backfill -- --plan`, then `--yes`).
 Other commands: `npm run job:daily -- [sgx|news|score|pipeline]`, `npm run job:weekly`,
 `npm test` (scoring unit tests), `npx tsx scripts/db-check.ts` (Postgres store on PGlite).
+
+**Environment for accounts:** `AUTH_SECRET` (`openssl rand -base64 32`) is required in
+production — without it `/login` and `/register` show a disabled notice; `next dev` falls
+back to a dev-only secret. `ADMIN_EMAIL` / `ADMIN_NAME` and `DEMO_USER_NAME` /
+`DEMO_USER_EMAIL` / `DEMO_USER_PASSWORD` define the env accounts; leave a password empty to
+disable that account. Set the same variables in Vercel and redeploy.
 
 **Quota warning:** the price history endpoint caps at 90 days per call, so three years
 requires pagination: ~13 calls per symbol, ~1,000 calls for the default 55 IDX + 17 SGX

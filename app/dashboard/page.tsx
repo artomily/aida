@@ -5,6 +5,7 @@ import { ATTENTION_MAX, EmptyState, Footer } from "../components/score";
 import SiteHeader from "../components/SiteHeader";
 import { SectorsPanel } from "../components/Structure";
 import { NEG, POS } from "../components/ui";
+import { requireUser } from "../lib/auth";
 import { loadSnapshot } from "../lib/data";
 import { dateLabel, dec, eventLabel, pct, pval, timeLabel } from "../lib/format";
 import "./terminal.css";
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Board() {
+  await requireUser("/dashboard");
   const snapshot = await loadSnapshot();
 
   return (

@@ -1,9 +1,12 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getStore } from "../../db/store";
-import { authEnabled, endSession, hashPassword, safeNext, startSession, verifyPassword } from "./auth";
+import { startAdminSession } from "./admin";
+import { ADMIN_COOKIE } from "./admin-token";
+import { authEnabled, endSession, envAccounts, hashPassword, matchEnvAccount, safeNext, startSession, verifyPassword } from "./auth";
 
 export type AuthState = { error?: string; email?: string; name?: string };
 
@@ -25,6 +28,8 @@ export async function register(_: AuthState, form: FormData): Promise<AuthState>
   if (!EMAIL.test(email) || email.length > 254) return { ...keep, error: "Format email tidak valid." };
   if (password.length < MIN_PASSWORD) return { ...keep, error: `Kata sandi minimal ${MIN_PASSWORD} karakter.` };
   if (password.length > 256) return { ...keep, error: "Kata sandi terlalu panjang." };
+  // Env accounts sign in with their configured password; nobody may claim the address first.
+  if (envAccounts().some((a) => a.email === email)) return { ...keep, error: "Email ini sudah terdaftar. Silakan masuk." };
 
   const id = randomUUID();
   const created = await (await getStore()).createUser({
@@ -45,6 +50,23 @@ export async function login(_: AuthState, form: FormData): Promise<AuthState> {
   const password = String(form.get("password") ?? "");
 
   if (!authEnabled()) return { email, error: "AUTH_SECRET belum diatur di environment." };
+
+  const account = matchEnvAccount(email, password);
+  if (account) {
+    const store = await getStore();
+    let existing = await store.getUserByEmail(email);
+    if (!existing) {
+      existing = { id: randomUUID(), email, name: account.name, passwordHash: await hashPassword(password), createdAt: new Date().toISOString() };
+      // Lost a race with a parallel first login: use the row that won.
+      if (!(await store.createUser(existing))) existing = await store.getUserByEmail(email);
+    }
+    if (existing) {
+      await startSession(existing.id);
+      if (account.admin) await startAdminSession();
+      redirect(safeNext(form.get("next")));
+    }
+  }
+
   const user = email && password ? await (await getStore()).getUserByEmail(email) : null;
   const ok = await verifyPassword(password, user?.passwordHash ?? (await DUMMY_HASH));
   if (!user || !ok) {
@@ -59,5 +81,6 @@ export async function login(_: AuthState, form: FormData): Promise<AuthState> {
 
 export async function logout() {
   await endSession();
+  (await cookies()).delete(ADMIN_COOKIE);
   redirect("/");
 }
